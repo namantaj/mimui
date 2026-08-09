@@ -3,54 +3,45 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Colors */
-  --color-on-error-container: #93000a;
-  --color-primary-fixed: #dbe1ff;
-  --color-on-background: #111c2d;
-  --color-primary-fixed-dim: #b4c5ff;
-  --color-secondary-fixed: #d3e4fe;
-  --color-error-container: #ffdad6;
-  --color-surface-container-highest: #d8e3fb;
-  --color-on-secondary-fixed: #0b1c30;
-  --color-on-secondary: #ffffff;
-  --color-secondary: #505f76;
-  --color-on-secondary-container: #54647a;
-  --color-primary: #1e40af;
-  --color-surface: #f9f9ff;
-  --color-secondary-container: #d0e1fb;
-  --color-on-tertiary-fixed: #002109;
-  --color-outline: #737686;
-  --color-secondary-fixed-dim: #b7c8e1;
-  --color-on-surface-variant: #434655;
-  --color-on-primary-fixed-variant: #003ea8;
-  --color-inverse-surface: #263143;
-  --color-surface-container-high: #dee8ff;
-  --color-on-tertiary: #ffffff;
-  --color-on-primary: #ffffff;
-  --color-on-primary-fixed: #00174b;
-  --color-surface-container-low: #f0f3ff;
-  --color-surface-container: #e7eeff;
-  --color-tertiary: #006329;
-  --color-background: #f9f9ff;
-  --color-primary-container: #1e3a8a;
-  --color-on-error: #ffffff;
-  --color-on-surface: #111c2d;
-  --color-on-tertiary-fixed-variant: #005320;
-  --color-inverse-on-surface: #ecf1ff;
-  --color-tertiary-container: #007f36;
-  --color-inverse-primary: #b4c5ff;
-  --color-surface-dim: #cfdaf2;
-  --color-surface-tint: #1e40af;
-  --color-error: #ba1a1a;
-  --color-on-tertiary-container: #c7ffca;
-  --color-outline-variant: #c3c6d7;
-  --color-surface-variant: #d8e3fb;
-  --color-surface-bright: #f9f9ff;
-  --color-tertiary-fixed-dim: #62df7d;
-  --color-tertiary-fixed: #7ffc97;
-  --color-surface-container-lowest: #ffffff;
-  --color-on-primary-container: #eeefff;
-  --color-on-secondary-fixed-variant: #38485d;
+  /* Bhagwn Solutions Color Palette Configuration */
+  --color-background: #F4F0E6;         /* Bone / Warm off-white */
+  --color-on-background: #211E1A;      /* Espresso Black */
+  
+  --color-surface: #FBF9F4;             /* Soft Cream */
+  --color-on-surface: #211E1A;          /* Espresso Black */
+  --color-on-surface-variant: #756F66;  /* Warm Gray */
+  
+  --color-primary: #7D1F2B;             /* Deep Burgundy */
+  --color-on-primary: #FBF9F4;          /* Soft Cream text on Burgundy */
+  --color-primary-container: #7D1F2B;
+  --color-on-primary-container: #FBF9F4;
+  
+  --color-secondary: #756F66;           /* Warm Gray */
+  --color-on-secondary: #FBF9F4;
+  
+  --color-tertiary: #28553F;            /* Deep Forest Green - Positive financial growth */
+  --color-tertiary-container: #28553F;
+  --color-on-tertiary: #FBF9F4;
+  
+  --color-outline: #D8D0C1;             /* Sand border */
+  --color-outline-variant: #D8D0C1;     /* Sand border */
+  
+  /* Container mappings matching surface ivory/bone/cream system */
+  --color-surface-container-lowest: #FBF9F4; /* Card background (Soft Cream) */
+  --color-surface-container-low: #F4F0E6;    /* Bone */
+  --color-surface-container: #EAE3D5;        /* Warm Ivory */
+  --color-surface-container-high: #EAE3D5;   /* Warm Ivory */
+  --color-surface-container-highest: #D8D0C1;/* Sand */
+
+  /* Extra Custom Theme Colors */
+  --color-gold: #B8953D;                /* Antique Gold accent */
+  --color-forest: #28553F;              /* Deep Forest Green */
+  --color-espresso: #211E1A;            /* Espresso Black */
+  --color-warm-gray: #756F66;           /* Warm Gray */
+  --color-bone: #F4F0E6;                /* Bone */
+  --color-ivory: #EAE3D5;               /* Warm Ivory */
+  --color-cream: #FBF9F4;               /* Soft Cream */
+  --color-sand: #D8D0C1;                /* Sand */
 
   /* Border Radius */
   --radius-default: 0.25rem;
@@ -62,22 +53,22 @@
   --spacing-md: 16px;
   --spacing-2xl: 48px;
   --spacing-sm: 8px;
-  --spacing-sidebar-width: 260px;
+  --spacing-sidebar-width: 280px;
   --spacing-base: 4px;
   --spacing-lg: 24px;
   --spacing-max-container: 1440px;
   --spacing-xl: 32px;
   --spacing-xs: 4px;
 
-  /* Fonts */
-  --font-body-md: "Inter", sans-serif;
-  --font-label-caps: "Inter", sans-serif;
-  --font-body-sm: "Inter", sans-serif;
-  --font-title-sm: "Inter", sans-serif;
-  --font-display-lg-mobile: "Inter", sans-serif;
+  /* Fonts with Devanagari fallback */
+  --font-body-md: "Inter", "Noto Sans Devanagari", sans-serif;
+  --font-label-caps: "Inter", "Noto Sans Devanagari", sans-serif;
+  --font-body-sm: "Inter", "Noto Sans Devanagari", sans-serif;
+  --font-title-sm: "Inter", "Noto Sans Devanagari", sans-serif;
+  --font-display-lg-mobile: "Inter", "Noto Sans Devanagari", sans-serif;
   --font-mono-label: "JetBrains Mono", monospace;
-  --font-display-lg: "Inter", sans-serif;
-  --font-headline-md: "Inter", sans-serif;
+  --font-display-lg: "Inter", "Noto Sans Devanagari", sans-serif;
+  --font-headline-md: "Inter", "Noto Sans Devanagari", sans-serif;
 
   /* Font sizes with line heights & weights */
   --text-body-md: 16px;
@@ -117,6 +108,30 @@
   --text-headline-md--font-weight: 600;
 }
 
+/* Redefining theme tokens in Dark Mode for high-end charcoal/espresso aesthetic */
+.dark {
+  --color-background: #211E1A;         /* Espresso Black */
+  --color-on-background: #F4F0E6;      /* Bone */
+  
+  --color-surface: #2B2722;             /* Warm dark brown/charcoal */
+  --color-on-surface: #F4F0E6;          /* Bone */
+  --color-on-surface-variant: #9B9487;  /* Warm Gray dim */
+  
+  --color-outline: #423C36;             /* Dark sand / charcoal border */
+  --color-outline-variant: #423C36;
+  
+  --color-surface-container-lowest: #2B2722; /* Dark soft cream equivalent */
+  --color-surface-container-low: #211E1A;
+  --color-surface-container: #1E1B18;
+  --color-surface-container-high: #1E1B18;
+  --color-surface-container-highest: #423C36;
+  
+  --color-primary: #7D1F2B;
+  --color-on-primary: #FBF9F4;
+  --color-secondary: #9B9487;
+  --color-tertiary: #4ade80;            /* High-contrast forest green for dark mode */
+}
+
 /* Material Symbols config */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -128,14 +143,27 @@
 }
 
 body {
-  background-color: #f9f9ff;
-  color: #111c2d;
+  background-color: var(--color-background);
+  color: var(--color-on-background);
   margin: 0;
   transition: background-color 0.2s, color 0.2s;
 }
-.dark body {
-  background-color: #0b0f19;
-  color: #f1f5f9;
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Premium card shadow */
+.shadow-card {
+  box-shadow: 0 1px 3px 0 rgba(33, 30, 26, 0.04), 0 1px 2px -1px rgba(33, 30, 26, 0.03);
+}
+.shadow-card-hover {
+  box-shadow: 0 4px 12px 0 rgba(33, 30, 26, 0.06), 0 2px 4px -1px rgba(33, 30, 26, 0.04);
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

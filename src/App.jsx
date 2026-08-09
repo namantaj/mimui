@@ -3,36 +3,68 @@ import Dashboard from './components/Dashboard';
 import MyBusiness from './components/MyBusiness';
 import Wallet from './components/Wallet';
 import Profile from './components/Profile';
-import Communication from './components/Communication';
-import Announcements from './components/Announcements';
-import Articles from './components/Articles';
 import KnowledgeCenter from './components/KnowledgeCenter';
 import Support from './components/Support';
 import Settings from './components/Settings';
 import LandingPage from './components/LandingPage';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { useLanguage } from './context/LanguageContext';
 
-function App() {
+function AppContent() {
+  const { isAuthenticated, user, logout } = useAuth();
+  const { t, locale, switchLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState('personal'); // 'personal', 'bank', 'kyc'
-  const [activeMenu, setActiveMenu] = useState('landing'); // 'landing', 'dashboard', 'business', 'wallet', 'profile', etc.
+  
+  // Initialize route state based on URL hash
+  const [activeMenu, setActiveMenu] = useState(() => {
+    const hash = window.location.hash.replace('#/', '');
+    return hash || 'landing';
+  });
+  
   const [darkMode, setDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showLanguages, setShowLanguages] = useState(false);
   const [language, setLanguage] = useState('English');
+
+  // Helper function to update route/hash
+  const setRoute = (route) => {
+    window.location.hash = `#/${route}`;
+  };
+
+  // Listen to hash change to support browser back/forward navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#/', '');
+      setActiveMenu(hash || 'landing');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Enforce Protected Routes
+  const isPublicRoute = activeMenu === 'landing' || activeMenu === 'login' || activeMenu === 'signup';
+
+  useEffect(() => {
+    if (!isPublicRoute && !isAuthenticated) {
+      setRoute('login');
+    }
+  }, [activeMenu, isAuthenticated, isPublicRoute]);
 
   useEffect(() => {
     const titles = {
-      dashboard: 'MLM Enterprise - Dashboard',
-      business: 'MLM Enterprise - My Business',
-      wallet: 'MLM Enterprise - Wallet',
-      profile: 'MLM Enterprise - Self Profile',
-      communication: 'MLM Enterprise - Communications',
-      announcements: 'MLM Enterprise - Announcements',
-      articles: 'MLM Enterprise - Articles',
-      knowledge: 'MLM Enterprise - Knowledge Center',
-      support: 'MLM Enterprise - Support Desk',
-      settings: 'MLM Enterprise - Settings'
+      landing: 'Bhagwn Solutions - Preserving Wealth, Empowering Growth',
+      dashboard: 'Bhagwn Solutions - Executive Dashboard',
+      business: 'Bhagwn Solutions - My Business',
+      wallet: 'Bhagwn Solutions - Financial Wallet',
+      profile: 'Bhagwn Solutions - Profile Settings',
+      knowledge: 'Bhagwn Solutions - Knowledge Center',
+      support: 'Bhagwn Solutions - Help Desk',
+      settings: 'Bhagwn Solutions - Portal Settings',
+      login: 'Bhagwn Solutions - Sign In',
+      signup: 'Bhagwn Solutions - Sign Up'
     };
-    document.title = titles[activeMenu] || 'MLM Enterprise';
+    document.title = titles[activeMenu] || 'Bhagwn Solutions';
   }, [activeMenu]);
   
   // Toast notifications
@@ -42,7 +74,7 @@ function App() {
     setTimeout(() => setToast({ show: false, message: '', type: 'success' }), 3000);
   };
 
-  // Form states
+  // Form states initialized with defaults, updated when mock user logs in
   const [profileForm, setProfileForm] = useState({
     fullName: 'Alexander Wright',
     email: 'alexander.wright@mlmenterprise.com',
@@ -56,6 +88,17 @@ function App() {
     country: 'United States'
   });
 
+  useEffect(() => {
+    if (user) {
+      setProfileForm(prev => ({
+        ...prev,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone
+      }));
+    }
+  }, [user]);
+
   const [bankForm, setBankForm] = useState({
     bankName: 'Chase Bank',
     accountNumber: '•••• •••• •••• 5678',
@@ -63,6 +106,15 @@ function App() {
     ifscCode: 'CHASUS33XX',
     accountType: 'Savings'
   });
+
+  useEffect(() => {
+    if (user) {
+      setBankForm(prev => ({
+        ...prev,
+        holderName: user.fullName
+      }));
+    }
+  }, [user]);
 
   const [kycForm, setKycForm] = useState({
     docType: 'Passport',
@@ -114,16 +166,16 @@ function App() {
 
   // Mock Notifications list
   const notificationsList = [
-    { id: 1, text: "New referral joined your team: Sarah Jenkins", time: "5m ago", unread: true },
-    { id: 2, text: "Payout of $1,250.00 processed successfully", time: "2h ago", unread: false },
+    { id: 1, text: "New referral joined your downline: Sarah Jenkins", time: "5m ago", unread: true },
+    { id: 2, text: "Dividend payout of $1,250.00 processed successfully", time: "2h ago", unread: false },
     { id: 3, text: "System maintenance scheduled for tonight at 2 AM EST", time: "1d ago", unread: false }
   ];
 
   if (activeMenu === 'landing') {
     return (
-      <div className="min-h-screen bg-background text-on-background font-body-md text-body-md antialiased transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
+      <div className="min-h-screen bg-background text-on-background font-body-md text-body-md antialiased transition-colors duration-200">
         {toast.show && (
-          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-md px-lg py-md rounded-lg shadow-xl bg-surface-container-lowest border border-outline-variant animate-bounce dark:bg-slate-900 dark:border-slate-800">
+          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-md px-lg py-md rounded-lg shadow-xl bg-surface-container-lowest border border-outline-variant animate-bounce">
             <span className={`material-symbols-outlined ${toast.type === 'success' ? 'text-tertiary' : 'text-primary'}`}>
               {toast.type === 'success' ? 'check_circle' : 'info'}
             </span>
@@ -132,9 +184,10 @@ function App() {
         )}
         <LandingPage 
           onGetStarted={() => {
-            setActiveMenu('dashboard');
-            triggerToast('Logged in successfully!');
+            setRoute(isAuthenticated ? 'dashboard' : 'login');
           }} 
+          setRoute={setRoute}
+          triggerToast={triggerToast}
           darkMode={darkMode}
           toggleDarkMode={toggleDarkMode}
         />
@@ -142,93 +195,135 @@ function App() {
     );
   }
 
+  if (activeMenu === 'login') {
+    return (
+      <div className="min-h-screen bg-background text-on-background font-body-md text-body-md antialiased transition-colors duration-200">
+        {toast.show && (
+          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-md px-lg py-md rounded-lg shadow-xl bg-surface-container-lowest border border-outline-variant animate-bounce">
+            <span className={`material-symbols-outlined ${toast.type === 'success' ? 'text-tertiary' : 'text-primary'}`}>
+              {toast.type === 'success' ? 'check_circle' : 'info'}
+            </span>
+            <span className="font-semibold text-body-sm">{toast.message}</span>
+          </div>
+        )}
+        <Login setRoute={setRoute} triggerToast={triggerToast} />
+      </div>
+    );
+  }
+
+  if (activeMenu === 'signup') {
+    return (
+      <div className="min-h-screen bg-background text-on-background font-body-md text-body-md antialiased transition-colors duration-200">
+        {toast.show && (
+          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-md px-lg py-md rounded-lg shadow-xl bg-surface-container-lowest border border-outline-variant animate-bounce">
+            <span className={`material-symbols-outlined ${toast.type === 'success' ? 'text-tertiary' : 'text-primary'}`}>
+              {toast.type === 'success' ? 'check_circle' : 'info'}
+            </span>
+            <span className="font-semibold text-body-sm">{toast.message}</span>
+          </div>
+        )}
+        <Signup setRoute={setRoute} triggerToast={triggerToast} />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background text-on-background font-body-md text-body-md antialiased flex transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen bg-background text-on-background font-body-md text-body-md antialiased flex transition-colors duration-200">
       
       {/* Toast Notification */}
       {toast.show && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-md px-lg py-md rounded-lg shadow-xl bg-surface-container-lowest border border-outline-variant animate-bounce dark:bg-slate-900 dark:border-slate-800">
-          <span className={`material-symbols-outlined ${toast.type === 'success' ? 'text-tertiary' : 'text-primary'}`}>
+        <div className="fixed bottom-5 right-5 z-[999] flex items-center gap-3 px-5 py-3 rounded-xl shadow-xl bg-cream border border-sand animate-fade-in">
+          <span className={`material-symbols-outlined text-[18px] ${toast.type === 'success' ? 'text-forest' : 'text-primary'}`}>
             {toast.type === 'success' ? 'check_circle' : 'info'}
           </span>
-          <span className="font-semibold text-body-sm">{toast.message}</span>
+          <span className="text-[13px] font-semibold text-espresso">{toast.message}</span>
         </div>
       )}
 
       {/* SideNavBar */}
-      <aside className="hidden md:flex flex-col py-lg fixed left-0 top-0 h-full w-sidebar-width bg-surface-container-lowest border-r border-outline-variant shadow-sm z-50 dark:bg-slate-900 dark:border-slate-800">
-        <div className="px-lg mb-xl">
-          <h1 className="font-headline-md text-headline-md font-bold text-primary dark:text-blue-400">MLM Enterprise</h1>
-          <p className="font-body-sm text-body-sm text-on-surface-variant dark:text-slate-400 mt-sm">Premium Portal</p>
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-full w-sidebar-width bg-bone border-r border-sand z-50">
+        
+        {/* Logo Branding Area */}
+        <div className="flex flex-col items-center pt-8 pb-5 px-6">
+          <img src="/logo.png" alt="Bhagwn Solutions" className="w-[170px] h-auto object-contain" />
+          
+          {/* Gold decorative divider */}
+          <div className="flex items-center gap-3 mt-5 w-full">
+            <div className="flex-1 h-px bg-gold/30"></div>
+            <span className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gold select-none">{t('common.executivePortal')}</span>
+            <div className="flex-1 h-px bg-gold/30"></div>
+          </div>
         </div>
-        <nav className="flex-1 px-sm">
-          <ul className="space-y-sm">
+
+        {/* Navigation */}
+        <nav className="flex-1 px-4 mt-2 overflow-y-auto hide-scrollbar">
+          <ul className="space-y-1">
             {[
-              { id: 'dashboard', icon: 'dashboard', label: 'Dashboard' },
-              { id: 'business', icon: 'account_tree', label: 'My Business' },
-              { id: 'wallet', icon: 'account_balance_wallet', label: 'Wallet' },
-              { id: 'profile', icon: 'person', label: 'Profile', filled: true },
-              { id: 'communication', icon: 'mail', label: 'Communication' },
-              { id: 'announcements', icon: 'campaign', label: 'Announcements' },
-              { id: 'articles', icon: 'article', label: 'Articles' },
-              { id: 'knowledge', icon: 'library_books', label: 'Knowledge Center' },
-              { id: 'support', icon: 'help_center', label: 'Support' },
-              { id: 'settings', icon: 'settings', label: 'Settings' }
+              { id: 'dashboard', icon: 'dashboard', label: t('nav.dashboard') },
+              { id: 'business', icon: 'account_tree', label: t('nav.referralCenter') },
+              { id: 'wallet', icon: 'account_balance_wallet', label: t('nav.financialWallet') },
+              { id: 'profile', icon: 'person', label: t('nav.profileSettings') },
+              { id: 'knowledge', icon: 'library_books', label: t('nav.knowledgeHub') },
+              { id: 'support', icon: 'help_center', label: t('nav.helpDesk') },
+              { id: 'settings', icon: 'settings', label: t('nav.systemSettings') }
             ].map((item) => {
               const isActive = activeMenu === item.id;
               return (
                 <li key={item.id}>
                   <button
                     onClick={() => {
-                      setActiveMenu(item.id);
-                      triggerToast(`Navigated to ${item.label}`);
+                      setRoute(item.id);
                     }}
-                    className={`w-full flex items-center px-md py-sm rounded transition-all duration-200 ${
+                    className={`w-full flex items-center gap-3 px-4 py-[10px] rounded-lg text-[14px] transition-all duration-200 cursor-pointer ${
                       isActive 
-                        ? 'text-primary font-bold border-l-4 border-primary bg-surface-container-low dark:text-blue-400 dark:border-blue-400 dark:bg-slate-800' 
-                        : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-slate-800'
+                        ? 'bg-primary text-on-primary font-semibold shadow-sm' 
+                        : 'text-warm-gray hover:text-espresso hover:bg-ivory/60 font-medium'
                     }`}
-                    style={isActive ? { transform: 'scale(0.98)' } : undefined}
                   >
-                    <span className={`material-symbols-outlined mr-md ${item.filled || isActive ? 'filled-icon' : ''}`}>
+                    <span className={`material-symbols-outlined text-[20px] ${isActive ? 'filled-icon' : ''}`}>
                       {item.icon}
                     </span>
-                    <span className="font-body-md text-body-md">{item.label}</span>
+                    <span>{item.label}</span>
                   </button>
                 </li>
               );
             })}
           </ul>
         </nav>
-        <div className="px-lg mt-auto flex flex-col gap-sm w-full">
+
+        {/* Bottom Actions */}
+        <div className="px-5 pb-6 pt-4 space-y-2 border-t border-sand mt-auto">
           <button 
             onClick={() => triggerToast("Invitation link copied to clipboard!")}
-            className="w-full bg-primary-container text-on-primary py-sm rounded-lg font-body-sm text-body-sm font-semibold hover:bg-primary transition-colors shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1)] dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer"
+            className="w-full bg-primary text-on-primary h-10 rounded-lg text-[13px] font-semibold hover:bg-[#641722] transition-colors shadow-sm cursor-pointer flex items-center justify-center gap-2"
           >
-            Invite New Member
+            <span className="material-symbols-outlined text-[18px]">person_add</span>
+            {t('nav.invitePartner')}
           </button>
           <button 
             onClick={() => {
-              setActiveMenu('landing');
+              logout();
+              setRoute('landing');
               triggerToast("Logged out successfully");
             }}
-            className="w-full border border-outline-variant text-on-surface hover:bg-surface-container-high py-sm rounded-lg font-body-sm text-body-sm font-semibold transition-colors dark:border-slate-800 dark:text-slate-350 dark:hover:bg-slate-800 cursor-pointer"
+            className="w-full border border-primary/30 text-primary h-10 rounded-lg text-[13px] font-semibold hover:bg-primary/5 transition-colors cursor-pointer flex items-center justify-center gap-2"
           >
-            Sign Out
+            <span className="material-symbols-outlined text-[18px]">logout</span>
+            {t('common.signOut')}
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-[260px] min-h-screen flex flex-col">
+      <main className="flex-1 md:ml-sidebar-width min-h-screen flex flex-col">
         
         {/* TopNavBar */}
-        <header className="flex justify-between items-center px-xl w-full z-40 fixed top-0 right-0 w-[calc(100%-260px)] h-16 bg-surface border-b border-outline-variant dark:bg-slate-900 dark:border-slate-800">
+        <header className="flex justify-between items-center px-8 z-40 fixed top-0 right-0 md:left-sidebar-width h-[60px] bg-cream/80 backdrop-blur-md border-b border-sand">
           <div className="flex-1 flex items-center">
-            <div className="relative w-64">
-              <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-slate-400">search</span>
+            <div className="relative w-56">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray text-[20px]">search</span>
               <input 
-                className="w-full pl-xl pr-sm py-xs bg-surface-container-lowest border border-outline-variant rounded-full font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100" 
+                className="w-full pl-10 pr-4 h-9 bg-bone border border-sand rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/30 placeholder:text-warm-gray/60" 
                 placeholder="Search..." 
                 type="text"
                 onKeyDown={(e) => {
@@ -240,7 +335,7 @@ function App() {
             </div>
           </div>
           
-          <div className="flex items-center space-x-lg relative">
+          <div className="flex items-center gap-5 relative">
             {/* Notification trigger */}
             <div className="relative">
               <button 
@@ -248,22 +343,22 @@ function App() {
                   setShowNotifications(!showNotifications);
                   setShowLanguages(false);
                 }}
-                className="text-on-surface-variant hover:text-primary transition-colors dark:text-slate-400 dark:hover:text-blue-400 flex items-center"
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-warm-gray hover:text-espresso hover:bg-ivory transition-all cursor-pointer relative"
               >
-                <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                <span className="material-symbols-outlined text-[20px]">notifications</span>
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full ring-2 ring-cream"></span>
               </button>
               
               {showNotifications && (
-                <div className="absolute right-0 mt-md w-80 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-xl py-sm z-50 dark:bg-slate-800 dark:border-slate-700">
-                  <div className="px-md py-xs border-b border-outline-variant dark:border-slate-700 font-bold text-body-sm">
+                <div className="absolute right-0 mt-2 w-80 bg-cream border border-sand rounded-xl shadow-xl py-1 z-50">
+                  <div className="px-4 py-3 border-b border-sand font-semibold text-[13px] text-espresso">
                     Notifications
                   </div>
-                  <ul className="divide-y divide-outline-variant dark:divide-slate-700">
+                  <ul className="divide-y divide-sand/50">
                     {notificationsList.map(notif => (
-                      <li key={notif.id} className="p-md hover:bg-surface-container-low dark:hover:bg-slate-700 cursor-pointer" onClick={() => triggerToast(`Clicked: ${notif.text}`)}>
-                        <p className={`font-body-sm text-body-sm ${notif.unread ? 'font-bold' : ''}`}>{notif.text}</p>
-                        <span className="text-xs text-on-surface-variant dark:text-slate-400">{notif.time}</span>
+                      <li key={notif.id} className="px-4 py-3 hover:bg-bone cursor-pointer transition-colors" onClick={() => triggerToast(`Clicked: ${notif.text}`)}>
+                        <p className={`text-[13px] text-espresso ${notif.unread ? 'font-semibold' : ''}`}>{notif.text}</p>
+                        <span className="text-[11px] text-warm-gray mt-1 block">{notif.time}</span>
                       </li>
                     ))}
                   </ul>
@@ -274,79 +369,73 @@ function App() {
             {/* Dark Mode toggle */}
             <button 
               onClick={toggleDarkMode}
-              className="text-on-surface-variant hover:text-primary transition-colors dark:text-slate-400 dark:hover:text-blue-400 flex items-center"
+              className="w-9 h-9 rounded-lg flex items-center justify-center text-warm-gray hover:text-espresso hover:bg-ivory transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined">{darkMode ? 'light_mode' : 'dark_mode'}</span>
+              <span className="material-symbols-outlined text-[20px]">{darkMode ? 'light_mode' : 'dark_mode'}</span>
             </button>
 
-            {/* Translate dropdown */}
+            {/* Translate / Language Switcher Button ("EN | हिंदी") */}
             <div className="relative">
               <button 
                 onClick={() => {
-                  setShowLanguages(!showLanguages);
-                  setShowNotifications(false);
+                  const targetLang = locale === 'en' ? 'hi' : 'en';
+                  switchLanguage(targetLang);
+                  triggerToast(`Language switched to ${targetLang === 'en' ? 'English' : 'हिंदी'}`);
                 }}
-                className="text-on-surface-variant hover:text-primary transition-colors dark:text-slate-400 dark:hover:text-blue-400 flex items-center"
+                className="h-8 px-3 rounded-lg bg-bone border border-sand hover:bg-ivory text-[12px] font-semibold text-espresso transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                title="Switch Language / भाषा बदलें"
               >
-                <span className="material-symbols-outlined">translate</span>
+                <span className="material-symbols-outlined text-[16px] text-gold">translate</span>
+                <span>{locale === 'en' ? 'EN | हिंदी' : 'हिंदी | EN'}</span>
               </button>
-
-              {showLanguages && (
-                <div className="absolute right-0 mt-md w-40 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-xl py-sm z-50 dark:bg-slate-800 dark:border-slate-700">
-                  {['English', 'Spanish', 'French', 'German'].map(lang => (
-                    <button 
-                      key={lang}
-                      onClick={() => {
-                        setLanguage(lang);
-                        triggerToast(`Language switched to ${lang}`);
-                        setShowLanguages(false);
-                      }}
-                      className="w-full text-left px-md py-sm hover:bg-surface-container-low dark:hover:bg-slate-700 text-body-sm transition-colors"
-                    >
-                      {lang}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* User Avatar */}
+            {/* Separator */}
+            <div className="w-px h-7 bg-sand"></div>
+
+            {/* User Avatar & Name */}
             <div 
               onClick={() => {
-                setActiveMenu('profile');
+                setRoute('profile');
                 triggerToast("Viewing Account Settings");
               }}
-              className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant cursor-pointer hover:ring-2 hover:ring-primary/50 transition-shadow"
+              className="flex items-center gap-2.5 cursor-pointer group pl-1"
             >
-              <img 
-                alt="User Avatar" 
-                className="w-full h-full object-cover" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOnnsIyGQRXtdKlMlRbEOvUF5XvANm32XMz-jtADr_BM1ygV0rZYMrasrKyye-6D8SZfwOgEAWfSLRLWqhJQdyNTQ6PVGKpE8gRW9rHlDPeDmKt56eA0ei6EVyactjcBja2l0JFTBqR8bvyGPIZH91qWJoGplBRoGyXmXH4bCZchybK_k4PPZVT4N1tJKWrzCaAKcX-BW_8cp3VEEALcSYH-B59d8J2B1OxVZoy8F2qW8lqVKUhSaN"
-              />
+              <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-sand group-hover:ring-primary/40 transition-all">
+                <img 
+                  alt="User Avatar" 
+                  className="w-full h-full object-cover" 
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOnnsIyGQRXtdKlMlRbEOvUF5XvANm32XMz-jtADr_BM1ygV0rZYMrasrKyye-6D8SZfwOgEAWfSLRLWqhJQdyNTQ6PVGKpE8gRW9rHlDPeDmKt56eA0ei6EVyactjcBja2l0JFTBqR8bvyGPIZH91qWJoGplBRoGyXmXH4bCZchybK_k4PPZVT4N1tJKWrzCaAKcX-BW_8cp3VEEALcSYH-B59d8J2B1OxVZoy8F2qW8lqVKUhSaN"
+                />
+              </div>
+              <div className="hidden lg:block">
+                <p className="text-[13px] font-semibold text-espresso leading-tight">
+                  {user ? user.fullName : 'Alexander Wright'}
+                </p>
+                <p className="text-[11px] text-warm-gray leading-tight">Gold Executive</p>
+              </div>
+              <span className="material-symbols-outlined text-warm-gray text-[16px] hidden lg:block">expand_more</span>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="mt-16 p-lg md:p-xl max-w-[1440px] mx-auto w-full flex-1 animate-fade-in">
+        <div className="mt-[60px] p-6 md:p-8 max-w-[1440px] mx-auto w-full flex-1 animate-fade-in">
           
           {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="flex text-on-surface-variant font-body-sm text-body-sm mb-lg dark:text-slate-400">
-            <ol className="inline-flex items-center space-x-1 md:space-x-3">
+          <nav aria-label="Breadcrumb" className="flex text-warm-gray text-[13px] mb-6">
+            <ol className="inline-flex items-center gap-1.5">
               <li className="inline-flex items-center">
-                <a className="hover:text-primary transition-colors dark:hover:text-blue-400" href="#" onClick={(e) => {e.preventDefault(); setActiveMenu('dashboard')}}>Dashboard</a>
+                <a className="hover:text-primary transition-colors" href="#" onClick={(e) => {e.preventDefault(); setRoute('dashboard')}}>Dashboard</a>
               </li>
               {activeMenu !== 'dashboard' && (
                 <li>
-                  <div className="flex items-center">
-                    <span className="material-symbols-outlined text-sm mx-1">chevron_right</span>
-                    <span className="text-on-surface font-semibold dark:text-slate-200">
-                      {activeMenu === 'business' && 'My Business'}
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                    <span className="text-espresso font-semibold">
+                      {activeMenu === 'business' && 'Referral Center'}
                       {activeMenu === 'wallet' && 'Financial Wallet'}
                       {activeMenu === 'profile' && 'Self Profile'}
-                      {activeMenu === 'communication' && 'Communications'}
-                      {activeMenu === 'announcements' && 'Announcements'}
-                      {activeMenu === 'articles' && 'Articles'}
                       {activeMenu === 'knowledge' && 'Knowledge Center'}
                       {activeMenu === 'support' && 'Support Desk'}
                       {activeMenu === 'settings' && 'Portal Settings'}
@@ -377,9 +466,6 @@ function App() {
               triggerToast={triggerToast}
             />
           )}
-          {activeMenu === 'communication' && <Communication triggerToast={triggerToast} />}
-          {activeMenu === 'announcements' && <Announcements triggerToast={triggerToast} />}
-          {activeMenu === 'articles' && <Articles triggerToast={triggerToast} />}
           {activeMenu === 'knowledge' && <KnowledgeCenter triggerToast={triggerToast} />}
           {activeMenu === 'support' && <Support triggerToast={triggerToast} />}
           {activeMenu === 'settings' && (
@@ -394,6 +480,14 @@ function App() {
         </div>
       </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
