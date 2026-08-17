@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Wallet({ triggerToast }) {
+  const { t } = useLanguage();
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawMethod, setWithdrawMethod] = useState('Bank Transfer');
   const [searchTerm, setSearchTerm] = useState('');
 
   const balances = [
-    { title: 'Available Wallet Balance', value: '$12,450.00', detail: 'Ready for withdrawal request', icon: 'account_balance_wallet', color: 'text-primary', bg: 'bg-primary/10' },
-    { title: 'Ledger Balance', value: '$14,200.00', detail: 'Pending cycle confirmation', icon: 'pending_actions', color: 'text-gold', bg: 'bg-gold/10' },
-    { title: 'Total Payouts Released', value: '$32,800.00', detail: 'Processed since account activation', icon: 'paid', color: 'text-tertiary', bg: 'bg-tertiary/10' }
+    { title: t('wallet.availableBalance'), value: '$12,450.00', detail: t('wallet.availableDetail'), icon: 'account_balance_wallet', color: 'text-primary', bg: 'bg-primary/10' },
+    { title: t('wallet.ledgerBalance'), value: '$14,200.00', detail: t('wallet.ledgerDetail'), icon: 'pending_actions', color: 'text-gold', bg: 'bg-gold/10' },
+    { title: t('wallet.totalPayouts'), value: '$32,800.00', detail: t('wallet.totalPayoutsDetail'), icon: 'paid', color: 'text-tertiary', bg: 'bg-tertiary/10' }
   ];
 
   const transactions = [
-    { id: 'TXN-1094', description: 'Sponsor Referral Commission - Sarah Jenkins', date: '2026-07-28', type: 'Commission', amount: '+$840.00', status: 'Completed' },
-    { id: 'TXN-1093', description: 'Monthly Binary Leg Matching Reward', date: '2026-07-25', type: 'Matching Dividend', amount: '+$1,200.00', status: 'Completed' },
-    { id: 'TXN-1087', description: 'Wallet Payout Cash Withdrawal Request', date: '2026-07-15', type: 'Withdrawal', amount: '-$1,500.00', status: 'Completed' },
-    { id: 'TXN-1081', description: 'Level 2 Indirect Placement Commission - Emily Watson', date: '2026-07-10', type: 'Commission', amount: '+$380.00', status: 'Completed' },
-    { id: 'TXN-1075', description: 'Executive Diamond Milestone Incentive Bonus', date: '2026-07-01', type: 'Rank Payout', amount: '+$2,500.00', status: 'Completed' },
-    { id: 'TXN-1064', description: 'Wallet Payout Cash Withdrawal Request', date: '2026-06-15', type: 'Withdrawal', amount: '-$2,000.00', status: 'Completed' }
+    { id: 'TXN-1094', description: 'Sponsor Referral Commission - Sarah Jenkins', date: '2026-07-28', type: t('wallet.commission'), amount: '+$840.00', status: t('wallet.completed') },
+    { id: 'TXN-1093', description: 'Monthly Binary Leg Matching Reward', date: '2026-07-25', type: t('wallet.matchingDividend'), amount: '+$1,200.00', status: t('wallet.completed') },
+    { id: 'TXN-1087', description: 'Wallet Payout Cash Withdrawal Request', date: '2026-07-15', type: t('wallet.withdrawal'), amount: '-$1,500.00', status: t('wallet.completed') },
+    { id: 'TXN-1081', description: 'Level 2 Indirect Placement Commission - Emily Watson', date: '2026-07-10', type: t('wallet.commission'), amount: '+$380.00', status: t('wallet.completed') },
+    { id: 'TXN-1075', description: 'Executive Diamond Milestone Incentive Bonus', date: '2026-07-01', type: t('wallet.rankPayout'), amount: '+$2,500.00', status: t('wallet.completed') },
+    { id: 'TXN-1064', description: 'Wallet Payout Cash Withdrawal Request', date: '2026-06-15', type: t('wallet.withdrawal'), amount: '-$2,000.00', status: t('wallet.completed') }
   ];
 
   const filteredTransactions = transactions.filter(txn =>
@@ -44,8 +46,8 @@ function Wallet({ triggerToast }) {
     <div className="space-y-lg animate-fade-in">
       {/* Title Header */}
       <div>
-        <h2 className="font-display-lg text-display-lg text-on-surface mb-xs">Financial Wallet</h2>
-        <p className="font-body-md text-body-md text-on-surface-variant">Manage portfolios, track earnings, and submit secure withdrawal requests.</p>
+        <h2 className="font-display-lg text-display-lg text-on-surface mb-xs">{t('wallet.title')}</h2>
+        <p className="font-body-md text-body-md text-on-surface-variant">{t('wallet.subtitle')}</p>
       </div>
 
       {/* Balance Grid */}
@@ -68,7 +70,7 @@ function Wallet({ triggerToast }) {
         {/* Transaction History log */}
         <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-md mb-lg">
-            <h3 className="font-title-sm text-title-sm text-on-surface">Transaction Ledger</h3>
+            <h3 className="font-title-sm text-title-sm text-on-surface">{t('wallet.transactionLedger')}</h3>
             
             {/* Search Filter */}
             <div className="relative w-64">
@@ -77,7 +79,7 @@ function Wallet({ triggerToast }) {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-xl pr-sm py-xs bg-surface border border-outline-variant rounded-full font-body-sm text-body-sm focus:outline-none focus:ring-1 focus:ring-primary/20" 
-                placeholder="Search ledger..." 
+                placeholder={t('wallet.searchLedger')} 
                 type="text"
               />
             </div>
@@ -87,12 +89,12 @@ function Wallet({ triggerToast }) {
             <table className="w-full border-collapse text-left text-body-sm">
               <thead>
                 <tr className="border-b border-outline-variant text-on-surface-variant font-bold">
-                  <th className="pb-sm font-semibold">Txn ID</th>
-                  <th className="pb-sm font-semibold">Description</th>
-                  <th className="pb-sm font-semibold">Date</th>
-                  <th className="pb-sm font-semibold">Type</th>
-                  <th className="pb-sm font-semibold">Amount</th>
-                  <th className="pb-sm font-semibold text-right">Status</th>
+                  <th className="pb-sm font-semibold">{t('wallet.txnId')}</th>
+                  <th className="pb-sm font-semibold">{t('wallet.description')}</th>
+                  <th className="pb-sm font-semibold">{t('wallet.date')}</th>
+                  <th className="pb-sm font-semibold">{t('wallet.type')}</th>
+                  <th className="pb-sm font-semibold">{t('wallet.amount')}</th>
+                  <th className="pb-sm font-semibold text-right">{t('wallet.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant">
@@ -115,7 +117,7 @@ function Wallet({ triggerToast }) {
                 {filteredTransactions.length === 0 && (
                   <tr>
                     <td colSpan="6" className="py-lg text-center text-on-surface-variant">
-                      No matching records found for "{searchTerm}".
+                      {t('wallet.noMatching', { query: searchTerm })}
                     </td>
                   </tr>
                 )}
@@ -126,12 +128,12 @@ function Wallet({ triggerToast }) {
 
         {/* Withdrawal Form */}
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm h-fit">
-          <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">Submit Payout Request</h3>
-          <p className="text-body-sm text-on-surface-variant mb-lg">Submit secure requests to release available yields to your verified settlement account.</p>
+          <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">{t('wallet.submitPayout')}</h3>
+          <p className="text-body-sm text-on-surface-variant mb-lg">{t('wallet.payoutSubtitle')}</p>
 
           <form onSubmit={handleWithdrawalSubmit} className="space-y-md">
             <div className="space-y-xs">
-              <label className="font-label-caps text-label-caps text-on-surface-variant">Withdrawal Amount ($)</label>
+              <label className="font-label-caps text-label-caps text-on-surface-variant">{t('wallet.withdrawalAmount')}</label>
               <input 
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(e.target.value)}
@@ -140,19 +142,19 @@ function Wallet({ triggerToast }) {
                 type="number"
                 step="0.01"
               />
-              <p className="text-xs text-on-surface-variant">Available balance: $12,450.00</p>
+              <p className="text-xs text-on-surface-variant">{t('wallet.availableBalLabel')} $12,450.00</p>
             </div>
 
             <div className="space-y-xs">
-              <label className="font-label-caps text-label-caps text-on-surface-variant">Settlement Method</label>
+              <label className="font-label-caps text-label-caps text-on-surface-variant">{t('wallet.settlementMethod')}</label>
               <select 
                 value={withdrawMethod}
                 onChange={(e) => setWithdrawMethod(e.target.value)}
                 className="w-full h-10 px-md rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface font-body-md text-body-md transition-shadow appearance-none"
               >
-                <option>Bank Transfer (Chase Bank ••••5678)</option>
-                <option>USDT Settlement (TRC-20 Wallet)</option>
-                <option>PayPal Verified Settlement</option>
+                <option>{t('wallet.bankTransfer')}</option>
+                <option>{t('wallet.usdtSettlement')}</option>
+                <option>{t('wallet.paypalSettlement')}</option>
               </select>
             </div>
 
@@ -160,7 +162,7 @@ function Wallet({ triggerToast }) {
               type="submit"
               className="w-full bg-primary text-on-primary font-title-sm text-body-sm font-semibold py-sm rounded-lg hover:opacity-95 transition-all shadow-md cursor-pointer"
             >
-              Submit Payout Request
+              {t('wallet.submitBtn')}
             </button>
           </form>
         </div>

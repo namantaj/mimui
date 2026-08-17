@@ -324,7 +324,7 @@ function AppContent() {
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray text-[20px]">search</span>
               <input 
                 className="w-full pl-10 pr-4 h-9 bg-bone border border-sand rounded-lg text-[13px] focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary/30 placeholder:text-warm-gray/60" 
-                placeholder="Search..." 
+                placeholder={t('common.search')} 
                 type="text"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -341,7 +341,6 @@ function AppContent() {
               <button 
                 onClick={() => {
                   setShowNotifications(!showNotifications);
-                  setShowLanguages(false);
                 }}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-warm-gray hover:text-espresso hover:bg-ivory transition-all cursor-pointer relative"
               >
@@ -352,7 +351,7 @@ function AppContent() {
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-cream border border-sand rounded-xl shadow-xl py-1 z-50">
                   <div className="px-4 py-3 border-b border-sand font-semibold text-[13px] text-espresso">
-                    Notifications
+                    {t('common.notifications')}
                   </div>
                   <ul className="divide-y divide-sand/50">
                     {notificationsList.map(notif => (
@@ -426,19 +425,19 @@ function AppContent() {
           <nav aria-label="Breadcrumb" className="flex text-warm-gray text-[13px] mb-6">
             <ol className="inline-flex items-center gap-1.5">
               <li className="inline-flex items-center">
-                <a className="hover:text-primary transition-colors" href="#" onClick={(e) => {e.preventDefault(); setRoute('dashboard')}}>Dashboard</a>
+                <a className="hover:text-primary transition-colors" href="#" onClick={(e) => {e.preventDefault(); setRoute('dashboard')}}>{t('nav.dashboard')}</a>
               </li>
               {activeMenu !== 'dashboard' && (
                 <li>
                   <div className="flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[14px]">chevron_right</span>
                     <span className="text-espresso font-semibold">
-                      {activeMenu === 'business' && 'Referral Center'}
-                      {activeMenu === 'wallet' && 'Financial Wallet'}
-                      {activeMenu === 'profile' && 'Self Profile'}
-                      {activeMenu === 'knowledge' && 'Knowledge Center'}
-                      {activeMenu === 'support' && 'Support Desk'}
-                      {activeMenu === 'settings' && 'Portal Settings'}
+                      {activeMenu === 'business' && t('nav.referralCenter')}
+                      {activeMenu === 'wallet' && t('nav.financialWallet')}
+                      {activeMenu === 'profile' && t('nav.profileSettings')}
+                      {activeMenu === 'knowledge' && t('nav.knowledgeHub')}
+                      {activeMenu === 'support' && t('nav.helpDesk')}
+                      {activeMenu === 'settings' && t('nav.systemSettings')}
                     </span>
                   </div>
                 </li>

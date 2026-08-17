@@ -3,94 +3,61 @@ import { useLanguage } from '../context/LanguageContext';
 
 function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDarkMode }) {
   const { t, locale, switchLanguage } = useLanguage();
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedPlanId, setSelectedPlanId] = useState(null);
 
-  const planDetailsMap = {
+  const planMetaMap = {
     '01': {
       id: '01',
-      titleKey: 'landing.plans.p1.title',
-      tagKey: 'landing.plans.p1.tag',
-      min: '₹10,000',
-      returns: 'Structured quarterly dividend',
-      descKey: 'landing.plans.p1.desc',
-      badgeKey: 'landing.plans.p1.badge',
       icon: 'account_balance_wallet',
       color: 'text-[#B9933F]',
-      bg: 'bg-[#B9933F]/10'
+      bg: 'bg-[#B9933F]/10',
+      border: 'border-[#B9933F]'
     },
     '02': {
       id: '02',
-      titleKey: 'landing.plans.p2.title',
-      tagKey: 'landing.plans.p2.tag',
-      min: '₹10 / day',
-      returns: 'Daily accumulation ledger',
-      descKey: 'landing.plans.p2.desc',
-      badgeKey: 'landing.plans.p2.badge',
       icon: 'calendar_today',
       color: 'text-[#861F2B]',
-      bg: 'bg-[#861F2B]/8'
+      bg: 'bg-[#861F2B]/10',
+      border: 'border-[#861F2B]'
     },
     '03': {
       id: '03',
-      titleKey: 'landing.plans.p3.title',
-      tagKey: 'landing.plans.p3.tag',
-      min: '₹100 min',
-      returns: 'Daily return payouts',
-      descKey: 'landing.plans.p3.desc',
-      badgeKey: 'landing.plans.p3.badge',
       icon: 'trending_up',
       color: 'text-[#285846]',
-      bg: 'bg-[#285846]/10'
+      bg: 'bg-[#285846]/10',
+      border: 'border-[#285846]'
     },
     '04': {
       id: '04',
-      titleKey: 'landing.plans.p4.title',
-      tagKey: 'landing.plans.p4.tag',
-      min: '₹50 / day',
-      returns: '7 months contribution cycle',
-      descKey: 'landing.plans.p4.desc',
-      badgeKey: 'landing.plans.p4.badge',
       icon: 'savings',
       color: 'text-[#B9933F]',
-      bg: 'bg-[#B9933F]/10'
+      bg: 'bg-[#B9933F]/10',
+      border: 'border-[#B9933F]'
     },
     '05': {
       id: '05',
-      titleKey: 'landing.plans.p5.title',
-      tagKey: 'landing.plans.p5.tag',
-      min: '1, 2, 3 Years',
-      returns: 'Maturity interest payout',
-      descKey: 'landing.plans.p5.desc',
-      badgeKey: 'landing.plans.p5.badge',
       icon: 'lock_clock',
       color: 'text-[#861F2B]',
-      bg: 'bg-[#861F2B]/8'
+      bg: 'bg-[#861F2B]/10',
+      border: 'border-[#861F2B]'
     },
     '06': {
       id: '06',
-      titleKey: 'landing.plans.p6.title',
-      tagKey: 'landing.plans.p6.tag',
-      min: '₹10 / day',
-      returns: 'Micro accumulation',
-      descKey: 'landing.plans.p6.desc',
-      badgeKey: 'landing.plans.p6.badge',
       icon: 'payments',
       color: 'text-[#285846]',
-      bg: 'bg-[#285846]/10'
+      bg: 'bg-[#285846]/10',
+      border: 'border-[#285846]'
     }
   };
 
   const handleOpenPlanModal = (planId) => {
-    const plan = planDetailsMap[planId];
-    if (plan) {
-      setSelectedPlan(plan);
-    }
+    setSelectedPlanId(planId);
   };
 
-  const handleSelectPlanAction = (plan) => {
-    setSelectedPlan(null);
+  const handleSelectPlanAction = (planTitle) => {
+    setSelectedPlanId(null);
     if (triggerToast) {
-      triggerToast(`Selected ${t(plan.titleKey)}. Proceeding to registration...`);
+      triggerToast(`Selected ${planTitle}. Proceeding to registration...`);
     }
     if (onGetStarted) {
       onGetStarted();
@@ -224,85 +191,24 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
 
             {/* 6 Compact Plan Rows */}
             <div className="relative z-10 space-y-2">
-              
-              {/* Row 01 */}
-              <div 
-                onClick={() => handleOpenPlanModal('01')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[11px] font-bold font-mono text-[#B9933F]">01</span>
-                  <span className="material-symbols-outlined text-[16px] text-[#861F2B]">account_balance_wallet</span>
-                  <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.plans.p1.title')}</span>
-                </div>
-                <span className="text-[11px] font-semibold text-[#756F66]">{t('landing.plans.p1.badge')}</span>
-              </div>
-
-              {/* Row 02 */}
-              <div 
-                onClick={() => handleOpenPlanModal('02')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[11px] font-bold font-mono text-[#B9933F]">02</span>
-                  <span className="material-symbols-outlined text-[16px] text-[#861F2B]">calendar_today</span>
-                  <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.plans.p2.title')}</span>
-                </div>
-                <span className="text-[12px] font-bold text-[#861F2B]">{t('landing.plans.p2.badge')}</span>
-              </div>
-
-              {/* Row 03 */}
-              <div 
-                onClick={() => handleOpenPlanModal('03')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[11px] font-bold font-mono text-[#B9933F]">03</span>
-                  <span className="material-symbols-outlined text-[16px] text-[#285846]">trending_up</span>
-                  <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.plans.p3.title')}</span>
-                </div>
-                <span className="text-[12px] font-bold text-[#285846]">{t('landing.plans.p3.badge')}</span>
-              </div>
-
-              {/* Row 04 */}
-              <div 
-                onClick={() => handleOpenPlanModal('04')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[11px] font-bold font-mono text-[#B9933F]">04</span>
-                  <span className="material-symbols-outlined text-[16px] text-[#B9933F]">savings</span>
-                  <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.plans.p4.title')}</span>
-                </div>
-                <span className="text-[12px] font-bold text-[#861F2B]">{t('landing.plans.p4.badge')}</span>
-              </div>
-
-              {/* Row 05 */}
-              <div 
-                onClick={() => handleOpenPlanModal('05')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[11px] font-bold font-mono text-[#B9933F]">05</span>
-                  <span className="material-symbols-outlined text-[16px] text-[#861F2B]">lock_clock</span>
-                  <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.plans.p5.title')}</span>
-                </div>
-                <span className="text-[11px] font-semibold text-[#756F66]">{t('landing.plans.p5.badge')}</span>
-              </div>
-
-              {/* Row 06 */}
-              <div 
-                onClick={() => handleOpenPlanModal('06')}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="text-[11px] font-bold font-mono text-[#B9933F]">06</span>
-                  <span className="material-symbols-outlined text-[16px] text-[#285846]">payments</span>
-                  <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.plans.p6.title')}</span>
-                </div>
-                <span className="text-[12px] font-bold text-[#861F2B]">{t('landing.plans.p6.badge')}</span>
-              </div>
-
+              {['01', '02', '03', '04', '05', '06'].map((id) => {
+                const planKey = `p${parseInt(id, 10)}`;
+                const meta = planMetaMap[id];
+                return (
+                  <div 
+                    key={id}
+                    onClick={() => handleOpenPlanModal(id)}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-[11px] font-bold font-mono text-[#B9933F]">{id}</span>
+                      <span className={`material-symbols-outlined text-[16px] ${meta.color}`}>{meta.icon}</span>
+                      <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t(`landing.plans.${planKey}.title`)}</span>
+                    </div>
+                    <span className="text-[11px] font-bold text-[#861F2B]">{t(`landing.plans.${planKey}.badge`)}</span>
+                  </div>
+                );
+              })}
             </div>
 
           </div>
@@ -313,7 +219,7 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
       {/* 3. DIRECT SMOOTH TRANSITION TO INVESTMENT PLANS SECTION */}
       <section id="plans" className="pt-6 pb-16 px-6 md:px-12 max-w-[1240px] mx-auto">
         
-        {/* Subtle Gold Line Separator (Option A) */}
+        {/* Subtle Gold Line Separator */}
         <div className="w-24 h-[1px] bg-[#B9933F]/40 mx-auto mb-8"></div>
 
         {/* Section Header */}
@@ -330,208 +236,56 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
         {/* 6 Cards 3x2 Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {/* CARD 01 (FEATURED) */}
-          <div className="bg-[#FFFDF8] border-2 border-[#B9933F]/60 rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-[#B9933F] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between h-[240px] relative group">
-            
-            <div className="absolute top-4 right-4 text-[10px] font-bold px-2 py-0.5 rounded bg-[#B9933F]/15 text-[#B9933F] tracking-wider uppercase">
-              {t('landing.featured')}
-            </div>
+          {['01', '02', '03', '04', '05', '06'].map((id) => {
+            const planKey = `p${parseInt(id, 10)}`;
+            const meta = planMetaMap[id];
+            const isFeatured = id === '01';
 
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-[12px] font-bold font-mono text-[#B9933F]">01</span>
-                <div className="w-7 h-7 rounded-lg bg-[#B9933F]/10 flex items-center justify-center text-[#B9933F]">
-                  <span className="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+            return (
+              <div 
+                key={id}
+                className={`bg-[#FFFDF8] rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-[#B9933F] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between min-h-[240px] relative group ${
+                  isFeatured ? 'border-2 border-[#B9933F]/60' : 'border border-[#D8D0C1]'
+                }`}
+              >
+                {isFeatured && (
+                  <div className="absolute top-4 right-4 text-[10px] font-bold px-2 py-0.5 rounded bg-[#B9933F]/15 text-[#B9933F] tracking-wider uppercase">
+                    {t('landing.featured')}
+                  </div>
+                )}
+
+                <div>
+                  <div className="flex items-center gap-2.5 mb-2">
+                    <span className="text-[12px] font-bold font-mono text-[#B9933F]">{id}</span>
+                    <div className={`w-7 h-7 rounded-lg ${meta.bg} flex items-center justify-center ${meta.color}`}>
+                      <span className="material-symbols-outlined text-[16px]">{meta.icon}</span>
+                    </div>
+                  </div>
+
+                  <h3 className="text-[16.5px] font-bold text-[#1D1B19] mb-1">{t(`landing.plans.${planKey}.title`)}</h3>
+                  <p className="text-[12.5px] text-[#756F66] leading-snug">
+                    {t(`landing.plans.${planKey}.desc`)}
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  <div className="mb-3">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F4F0E8] border border-[#D8D0C1] text-[11px] font-semibold text-[#1D1B19]">
+                      {t(`landing.plans.${planKey}.badge`)}
+                    </span>
+                  </div>
+                  <div className="pt-2.5 border-t border-[#D8D0C1]/60 flex items-center justify-between">
+                    <button 
+                      onClick={() => handleOpenPlanModal(id)}
+                      className="text-[12.5px] font-bold text-[#861F2B] group-hover:text-[#641722] flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>{t('landing.explorePlan')}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <h3 className="text-[16.5px] font-bold text-[#1D1B19] mb-1">{t('landing.plans.p1.title')}</h3>
-              <p className="text-[12.5px] text-[#756F66] leading-snug">
-                {t('landing.plans.p1.desc')}
-              </p>
-            </div>
-
-            <div>
-              <div className="mb-3">
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F4F0E8] border border-[#D8D0C1] text-[11px] font-semibold text-[#1D1B19]">
-                  {t('landing.plans.p1.badge')}
-                </span>
-              </div>
-              <div className="pt-2.5 border-t border-[#D8D0C1]/60 flex items-center justify-between">
-                <button 
-                  onClick={() => handleOpenPlanModal('01')}
-                  className="text-[12.5px] font-bold text-[#861F2B] group-hover:text-[#641722] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t('landing.explorePlan')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* CARD 02 */}
-          <div className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-[#B9933F] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between h-[240px] group">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-[12px] font-bold font-mono text-[#B9933F]">02</span>
-                <div className="w-7 h-7 rounded-lg bg-[#861F2B]/8 flex items-center justify-center text-[#861F2B]">
-                  <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                </div>
-              </div>
-
-              <h3 className="text-[16.5px] font-bold text-[#1D1B19] mb-1">{t('landing.plans.p2.title')}</h3>
-              <p className="text-[12.5px] text-[#756F66] leading-snug">
-                {t('landing.plans.p2.desc')}
-              </p>
-            </div>
-
-            <div>
-              <div className="mb-3">
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F4F0E8] border border-[#D8D0C1] text-[11px] font-semibold text-[#1D1B19]">
-                  {t('landing.plans.p2.badge')}
-                </span>
-              </div>
-              <div className="pt-2.5 border-t border-[#D8D0C1]/60 flex items-center justify-between">
-                <button 
-                  onClick={() => handleOpenPlanModal('02')}
-                  className="text-[12.5px] font-bold text-[#861F2B] group-hover:text-[#641722] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t('landing.explorePlan')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* CARD 03 */}
-          <div className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-[#B9933F] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between h-[240px] group">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-[12px] font-bold font-mono text-[#B9933F]">03</span>
-                <div className="w-7 h-7 rounded-lg bg-[#285846]/10 flex items-center justify-center text-[#285846]">
-                  <span className="material-symbols-outlined text-[16px]">trending_up</span>
-                </div>
-              </div>
-
-              <h3 className="text-[16.5px] font-bold text-[#1D1B19] mb-1">{t('landing.plans.p3.title')}</h3>
-              <p className="text-[12.5px] text-[#756F66] leading-snug">
-                {t('landing.plans.p3.desc')}
-              </p>
-            </div>
-
-            <div>
-              <div className="mb-3">
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F4F0E8] border border-[#D8D0C1] text-[11px] font-semibold text-[#1D1B19]">
-                  {t('landing.plans.p3.badge')}
-                </span>
-              </div>
-              <div className="pt-2.5 border-t border-[#D8D0C1]/60 flex items-center justify-between">
-                <button 
-                  onClick={() => handleOpenPlanModal('03')}
-                  className="text-[12.5px] font-bold text-[#861F2B] group-hover:text-[#641722] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t('landing.explorePlan')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* CARD 04 */}
-          <div className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-[#B9933F] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between h-[240px] group">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-[12px] font-bold font-mono text-[#B9933F]">04</span>
-                <div className="w-7 h-7 rounded-lg bg-[#B9933F]/10 flex items-center justify-center text-[#B9933F]">
-                  <span className="material-symbols-outlined text-[16px]">savings</span>
-                </div>
-              </div>
-
-              <h3 className="text-[16.5px] font-bold text-[#1D1B19] mb-1">{t('landing.plans.p4.title')}</h3>
-              <p className="text-[12.5px] text-[#756F66] leading-snug">
-                {t('landing.plans.p4.desc')}
-              </p>
-            </div>
-
-            <div>
-              <div className="mb-3">
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F4F0E8] border border-[#D8D0C1] text-[11px] font-semibold text-[#1D1B19]">
-                  {t('landing.plans.p4.badge')}
-                </span>
-              </div>
-              <div className="pt-2.5 border-t border-[#D8D0C1]/60 flex items-center justify-between">
-                <button 
-                  onClick={() => handleOpenPlanModal('04')}
-                  className="text-[12.5px] font-bold text-[#861F2B] group-hover:text-[#641722] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t('landing.explorePlan')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* CARD 05 */}
-          <div className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-[#B9933F] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between h-[240px] group">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-[12px] font-bold font-mono text-[#B9933F]">05</span>
-                <div className="w-7 h-7 rounded-lg bg-[#861F2B]/8 flex items-center justify-center text-[#861F2B]">
-                  <span className="material-symbols-outlined text-[16px]">lock_clock</span>
-                </div>
-              </div>
-
-              <h3 className="text-[16.5px] font-bold text-[#1D1B19] mb-1">{t('landing.plans.p5.title')}</h3>
-              <p className="text-[12.5px] text-[#756F66] leading-snug">
-                {t('landing.plans.p5.desc')}
-              </p>
-            </div>
-
-            <div>
-              <div className="mb-3">
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F4F0E8] border border-[#D8D0C1] text-[11px] font-semibold text-[#1D1B19]">
-                  {t('landing.plans.p5.badge')}
-                </span>
-              </div>
-              <div className="pt-2.5 border-t border-[#D8D0C1]/60 flex items-center justify-between">
-                <button 
-                  onClick={() => handleOpenPlanModal('05')}
-                  className="text-[12.5px] font-bold text-[#861F2B] group-hover:text-[#641722] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t('landing.explorePlan')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* CARD 06 */}
-          <div className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-5 shadow-card hover:shadow-card-hover hover:border-[#B9933F] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between h-[240px] group">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="text-[12px] font-bold font-mono text-[#B9933F]">06</span>
-                <div className="w-7 h-7 rounded-lg bg-[#285846]/10 flex items-center justify-center text-[#285846]">
-                  <span className="material-symbols-outlined text-[16px]">payments</span>
-                </div>
-              </div>
-
-              <h3 className="text-[16.5px] font-bold text-[#1D1B19] mb-1">{t('landing.plans.p6.title')}</h3>
-              <p className="text-[12.5px] text-[#756F66] leading-snug">
-                {t('landing.plans.p6.desc')}
-              </p>
-            </div>
-
-            <div>
-              <div className="mb-3">
-                <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F4F0E8] border border-[#D8D0C1] text-[11px] font-semibold text-[#1D1B19]">
-                  {t('landing.plans.p6.badge')}
-                </span>
-              </div>
-              <div className="pt-2.5 border-t border-[#D8D0C1]/60 flex items-center justify-between">
-                <button 
-                  onClick={() => handleOpenPlanModal('06')}
-                  className="text-[12.5px] font-bold text-[#861F2B] group-hover:text-[#641722] flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t('landing.explorePlan')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
+            );
+          })}
 
         </div>
       </section>
@@ -689,64 +443,191 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
       </footer>
 
       {/* 9. PLAN PREVIEW MODAL */}
-      {selectedPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1D1B19]/60 backdrop-blur-xs animate-fade-in">
-          <div className="bg-[#FFFDF8] border-2 border-[#B9933F] rounded-2xl shadow-2xl p-6 w-full max-w-[440px] space-y-4 relative">
-            
-            {/* Close Button */}
-            <button 
-              onClick={() => setSelectedPlan(null)}
-              className="absolute top-4 right-4 text-[#756F66] hover:text-[#1D1B19] text-[20px] cursor-pointer"
-            >
-              <span className="material-symbols-outlined">close</span>
-            </button>
+      {selectedPlanId && (() => {
+        const planKey = `p${parseInt(selectedPlanId, 10)}`;
+        const planData = t(`landing.plans.${planKey}`);
+        const meta = planMetaMap[selectedPlanId];
+        if (!planData || !meta) return null;
 
-            {/* Header */}
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl ${selectedPlan.bg} ${selectedPlan.color} flex items-center justify-center`}>
-                <span className="material-symbols-outlined text-[22px]">{selectedPlan.icon}</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold tracking-wider text-[#B9933F] uppercase">{t(selectedPlan.tagKey)}</span>
-                <h3 className="text-[18px] font-bold text-[#1D1B19]">{t(selectedPlan.titleKey)}</h3>
-              </div>
-            </div>
-
-            {/* Content Details */}
-            <p className="text-[13.5px] text-[#756F66] leading-relaxed">
-              {t(selectedPlan.descKey)}
-            </p>
-
-            <div className="bg-[#F4F0E8] border border-[#D8D0C1] rounded-xl p-3.5 space-y-2">
-              <div className="flex justify-between items-center text-[13px]">
-                <span className="text-[#756F66]">Contribution Threshold:</span>
-                <span className="font-bold text-[#1D1B19]">{selectedPlan.min}</span>
-              </div>
-              <div className="flex justify-between items-center text-[13px]">
-                <span className="text-[#756F66]">Return Schedule:</span>
-                <span className="font-bold text-[#861F2B]">{selectedPlan.returns}</span>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() => handleSelectPlanAction(selectedPlan)}
-                className="flex-1 h-11 bg-[#861F2B] hover:bg-[#641722] text-[#FFFDF8] font-bold text-[13.5px] rounded-xl shadow-xs cursor-pointer transition-colors"
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1D1B19]/70 backdrop-blur-xs animate-fade-in overflow-y-auto">
+            <div className="bg-[#FFFDF8] border-2 border-[#B9933F] rounded-2xl shadow-2xl p-6 sm:p-7 w-full max-w-[620px] max-h-[90vh] overflow-y-auto my-auto relative text-left space-y-5">
+              
+              {/* Close Button */}
+              <button 
+                onClick={() => setSelectedPlanId(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#F4F0E8] hover:bg-[#EAE4D7] text-[#756F66] hover:text-[#1D1B19] flex items-center justify-center cursor-pointer transition-colors"
+                aria-label={t('landing.close')}
               >
-                {t('landing.selectAndInvest')}
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
-              <button
-                onClick={() => setSelectedPlan(null)}
-                className="px-4 h-11 border border-[#D8D0C1] text-[#1D1B19] font-semibold text-[13.5px] rounded-xl hover:bg-[#F4F0E8] cursor-pointer transition-colors"
-              >
-                {t('landing.close')}
-              </button>
-            </div>
 
+              {/* Modal Header */}
+              <div className="flex items-start gap-3.5 pr-8">
+                <div className={`w-12 h-12 rounded-xl ${meta.bg} ${meta.color} flex items-center justify-center shrink-0 shadow-xs mt-0.5`}>
+                  <span className="material-symbols-outlined text-[26px]">{meta.icon}</span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold tracking-wider text-[#B9933F] uppercase block">{planData.tag}</span>
+                  <h3 className="text-[20px] sm:text-[22px] font-extrabold text-[#1D1B19] leading-tight">{planData.title}</h3>
+                  <p className="text-[13px] text-[#756F66] mt-1 leading-relaxed">{planData.overview}</p>
+                </div>
+              </div>
+
+              {/* Quick Specs Grid */}
+              <div className="grid grid-cols-2 gap-3 bg-[#F4F0E8] border border-[#D8D0C1] rounded-xl p-3.5 sm:p-4 text-[13px]">
+                <div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#756F66] block">{t('landing.plans.minInvestment')}</span>
+                  <span className="font-bold text-[#1D1B19] text-[14px]">{planData.min}</span>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#756F66] block">{t('landing.plans.investmentType')}</span>
+                  <span className="font-bold text-[#1D1B19] text-[14px]">{planData.type}</span>
+                </div>
+                <div className="mt-1">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#756F66] block">{t('landing.plans.tenure')}</span>
+                  <span className="font-bold text-[#861F2B] text-[14px]">{planData.tenure}</span>
+                </div>
+                <div className="mt-1">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#756F66] block">{t('landing.plans.payoutSchedule')}</span>
+                  <span className="font-bold text-[#285846] text-[14px]">{planData.payout}</span>
+                </div>
+              </div>
+
+              {/* Allocated Sectors (if Plan 01) */}
+              {planData.sectors && (
+                <div className="space-y-2">
+                  <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#B9933F] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]">pie_chart</span>
+                    <span>{t('landing.plans.allocatedSectors')}</span>
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {planData.sectors.map((sec, idx) => (
+                      <span key={idx} className="px-2.5 py-1 rounded-lg bg-[#F4F0E8] border border-[#D8D0C1] text-[12px] font-semibold text-[#1D1B19]">
+                        {sec}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Key Features */}
+              {planData.features && (
+                <div className="space-y-2">
+                  <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#1D1B19] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-[#B9933F]">stars</span>
+                    <span>{t('landing.plans.keyFeatures')}</span>
+                  </h4>
+                  <ul className="space-y-2 text-[13px] text-[#1D1B19]">
+                    {planData.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="material-symbols-outlined text-[#861F2B] text-[16px] shrink-0 mt-0.5">check_circle</span>
+                        <span className="leading-snug">{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Special Offer Cards for Daily Return Plan (03) */}
+              {selectedPlanId === '03' && planData.offerA && planData.offerB && (
+                <div className="space-y-3 pt-1">
+                  <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#1D1B19] flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-[#285846]">table_chart</span>
+                    <span>{t('landing.plans.planExample')}</span>
+                  </h4>
+                  
+                  {/* Offer A */}
+                  <div className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-3.5 space-y-1.5">
+                    <span className="text-[12px] font-bold text-[#861F2B] uppercase tracking-wider block">{planData.offerA.title}</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[12.5px] pt-1">
+                      <div className="bg-[#F4F0E8] p-2 rounded-lg"><span className="text-[#756F66] block text-[11px]">Investment</span><strong className="text-[#1D1B19]">{planData.offerA.min}</strong></div>
+                      <div className="bg-[#F4F0E8] p-2 rounded-lg"><span className="text-[#756F66] block text-[11px]">Daily Payout</span><strong className="text-[#285846]">{planData.offerA.daily}</strong></div>
+                      <div className="bg-[#F4F0E8] p-2 rounded-lg"><span className="text-[#756F66] block text-[11px]">Referral Bonus</span><strong className="text-[#B9933F]">{planData.offerA.ref}</strong></div>
+                    </div>
+                  </div>
+
+                  {/* Offer B */}
+                  <div className="bg-[#FFFDF8] border-2 border-[#B9933F]/40 rounded-xl p-3.5 space-y-2 bg-gradient-to-br from-[#FFFDF8] to-[#F4F0E8]/40">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] font-bold text-[#B9933F] uppercase tracking-wider">{planData.offerB.title}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#B9933F] text-[#FFFDF8]">PROMOTIONAL OFFER</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[12px]">
+                      <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Min Deposit</span><strong className="text-[#1D1B19]">{planData.offerB.min}</strong></div>
+                      <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Duration</span><strong className="text-[#1D1B19]">{planData.offerB.duration}</strong></div>
+                      <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Daily R.O.I</span><strong className="text-[#285846]">{planData.offerB.daily}</strong></div>
+                      <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Monthly Return</span><strong className="text-[#1D1B19]">{planData.offerB.monthly}</strong></div>
+                      <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Total Return</span><strong className="text-[#861F2B]">{planData.offerB.totalPayout}</strong></div>
+                      <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Total Benefit Shown</span><strong className="text-[#B9933F]">{planData.offerB.netBenefit}</strong></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Plan Tables (for Plans 02, 04, 05, 06) */}
+              {planData.tableHeader && planData.tableRows && selectedPlanId !== '03' && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[13px] font-bold uppercase tracking-wider text-[#1D1B19] flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[16px] text-[#285846]">table_chart</span>
+                      <span>{t('landing.plans.planExample')}</span>
+                    </h4>
+                    <span className="text-[10.5px] italic text-[#756F66]">{t('landing.plans.brochureDisclaimer')}</span>
+                  </div>
+
+                  <div className="overflow-x-auto border border-[#D8D0C1] rounded-xl bg-[#FFFDF8]">
+                    <table className="w-full text-left border-collapse text-[12.5px]">
+                      <thead>
+                        <tr className="bg-[#F4F0E8] border-b border-[#D8D0C1] text-[#1D1B19] font-bold">
+                          {Object.values(planData.tableHeader).map((head, idx) => (
+                            <th key={idx} className="p-2.5 font-semibold text-[11.5px] uppercase tracking-wider">{head}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#D8D0C1]/60 text-[#1D1B19]">
+                        {planData.tableRows.map((row, rIdx) => (
+                          <tr key={rIdx} className="hover:bg-[#F4F0E8]/50 transition-colors">
+                            {Object.values(row).map((val, cIdx) => (
+                              <td key={cIdx} className="p-2.5 font-medium">{val}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Terms & Conditions Notice Box */}
+              {planData.disclaimer && (
+                <div className="bg-[#F4F0E8]/80 border border-[#D8D0C1] rounded-xl p-3 text-[11.5px] text-[#756F66] space-y-1">
+                  <span className="font-bold text-[#861F2B] uppercase tracking-wider text-[10px] block">{t('landing.plans.termsHeader')}</span>
+                  <p className="leading-snug">{planData.disclaimer}</p>
+                </div>
+              )}
+
+              {/* Modal Footer CTAs */}
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={() => handleSelectPlanAction(planData.title)}
+                  className="flex-1 h-11 bg-[#861F2B] hover:bg-[#641722] text-[#FFFDF8] font-bold text-[13.5px] uppercase tracking-wide rounded-xl shadow-xs cursor-pointer transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>{t('landing.selectAndInvest')}</span>
+                  <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                </button>
+                <button
+                  onClick={() => setSelectedPlanId(null)}
+                  className="px-5 h-11 border border-[#D8D0C1] hover:border-[#756F66] text-[#1D1B19] font-bold text-[13.5px] uppercase tracking-wide rounded-xl hover:bg-[#F4F0E8] cursor-pointer transition-colors"
+                >
+                  {t('landing.close')}
+                </button>
+              </div>
+
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
     </div>
   );

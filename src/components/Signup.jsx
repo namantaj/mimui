@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { validateReferralCode } from '../services/authService';
+import { useLanguage } from '../context/LanguageContext';
 
 function Signup({ setRoute, triggerToast }) {
   const { signup } = useAuth();
+  const { t, locale, switchLanguage } = useLanguage();
   
   // Form State
   const [fullName, setFullName] = useState('');
@@ -24,35 +26,35 @@ function Signup({ setRoute, triggerToast }) {
     const newErrors = {};
 
     if (!fullName.trim()) {
-      newErrors.fullName = 'Full name is required.';
+      newErrors.fullName = t('auth.errors.fullNameRequired');
     }
 
     if (!emailOrPhone.trim()) {
-      newErrors.emailOrPhone = 'Email or phone number is required.';
+      newErrors.emailOrPhone = t('auth.errors.emailOrPhoneRequired');
     } else if (emailOrPhone.includes('@')) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(emailOrPhone.trim())) {
-        newErrors.emailOrPhone = 'Please enter a valid email address.';
+        newErrors.emailOrPhone = t('auth.errors.invalidEmail');
       }
     }
 
     if (!password) {
-      newErrors.password = 'Password is required.';
+      newErrors.password = t('auth.errors.passwordRequired');
     } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters.';
+      newErrors.password = t('auth.errors.passwordMin');
     }
 
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match.';
+      newErrors.confirmPassword = t('auth.errors.passwordMismatch');
     }
 
     if (!referralCode.trim()) {
-      newErrors.referralCode = 'Sponsor referral code is required.';
+      newErrors.referralCode = t('auth.errors.sponsorCodeRequired');
     } else {
       // Validate referral code asynchronously
       const isValid = await validateReferralCode(referralCode.trim());
       if (!isValid) {
-        newErrors.referralCode = 'Invalid or inactive sponsor referral code.';
+        newErrors.referralCode = t('auth.errors.invalidSponsorCode');
       }
     }
 
@@ -63,15 +65,12 @@ function Signup({ setRoute, triggerToast }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
+    const isValid = await validate();
+    if (!isValid) return;
+
     setIsSubmitting(true);
 
     try {
-      const isValid = await validate();
-      if (!isValid) {
-        setIsSubmitting(false);
-        return;
-      }
-
       const responseUser = await signup({
         fullName: fullName.trim(),
         emailOrPhone: emailOrPhone.trim(),
@@ -79,10 +78,10 @@ function Signup({ setRoute, triggerToast }) {
         referralCode: referralCode.trim()
       });
 
-      triggerToast('Registration completed successfully!');
+      triggerToast(t('auth.successToast'));
       setCreatedUser(responseUser);
     } catch (err) {
-      setSubmitError(err.message || 'Registration failed. Please try again.');
+      setSubmitError(err.message || t('auth.errors.failed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,18 +102,18 @@ function Signup({ setRoute, triggerToast }) {
           </div>
 
           <div className="space-y-1.5">
-            <h2 className="text-[20px] font-bold text-espresso">Welcome to Bhagwn Solutions</h2>
-            <p className="text-[13px] text-warm-gray">Your executive partner account is active.</p>
+            <h2 className="text-[20px] font-bold text-espresso">{t('auth.welcome')}</h2>
+            <p className="text-[13px] text-warm-gray">{t('auth.accountActive')}</p>
           </div>
 
           {/* Generated Referral Code Card */}
           <div className="bg-bone border border-sand rounded-xl p-4 space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-warm-gray">Your Assigned Sponsor Code</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.05em] text-warm-gray">{t('auth.assignedCodeTitle')}</p>
             <p className="text-[24px] font-bold text-primary tracking-wider font-mono">
               {createdUser.referralCode}
             </p>
             <p className="text-[12px] text-warm-gray leading-relaxed pt-1">
-              Use this code to sponsor and recruit downline partners to optimize matching dividends.
+              {t('auth.assignedCodeDesc')}
             </p>
           </div>
 
@@ -122,7 +121,7 @@ function Signup({ setRoute, triggerToast }) {
             onClick={handleProceed}
             className="w-full h-11 bg-primary text-on-primary text-[14px] font-semibold rounded-xl hover:bg-[#641722] transition-colors shadow-sm flex items-center justify-center cursor-pointer"
           >
-            Go to Executive Dashboard
+            {t('auth.goToDashboard')}
           </button>
         </div>
       </div>
@@ -133,14 +132,21 @@ function Signup({ setRoute, triggerToast }) {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background animate-fade-in transition-colors duration-200">
       <div className="w-full max-w-[460px] bg-cream border border-sand rounded-2xl shadow-lg p-8 space-y-6">
         
-        {/* Back to Home Navigation */}
-        <div className="flex items-center pb-3 border-b border-sand/60">
+        {/* Back to Home & Language Switcher Navigation */}
+        <div className="flex items-center justify-between pb-3 border-b border-sand/60">
           <button
             onClick={() => setRoute('landing')}
             className="flex items-center gap-1.5 text-[13px] font-semibold text-warm-gray hover:text-primary transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-            Back to Home
+            {t('common.backToHome')}
+          </button>
+          <button 
+            onClick={() => switchLanguage(locale === 'en' ? 'hi' : 'en')}
+            className="h-7 px-2.5 rounded-lg bg-bone border border-sand hover:bg-ivory text-[11px] font-semibold text-espresso transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[14px] text-gold">translate</span>
+            <span>{locale === 'en' ? 'EN | हिंदी' : 'हिंदी | EN'}</span>
           </button>
         </div>
 

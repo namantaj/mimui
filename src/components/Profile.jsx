@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Profile({
   activeTab,
@@ -14,6 +15,8 @@ function Profile({
   handleKycSubmit,
   triggerToast
 }) {
+  const { t } = useLanguage();
+
   return (
     <div>
       {/* Profile Header Card */}
@@ -42,7 +45,7 @@ function Profile({
             </div>
             <div className="flex gap-sm justify-center md:justify-end">
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-tertiary/10 text-tertiary font-label-caps text-label-caps border border-tertiary/20">
-                <span className="material-symbols-outlined text-xs mr-1">check_circle</span> Verified
+                <span className="material-symbols-outlined text-xs mr-1">check_circle</span> {t('profile.verified')}
               </span>
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-gold/10 text-gold font-label-caps text-label-caps border border-gold/20">
                 Diamond Director
@@ -52,19 +55,19 @@ function Profile({
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-md mt-lg border-t border-outline-variant pt-lg">
             <div>
-              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">Join Date</p>
+              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">{t('profile.joinDate')}</p>
               <p className="font-title-sm text-title-sm text-on-surface">Oct 12, 2021</p>
             </div>
             <div>
-              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">Direct Referrals</p>
+              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">{t('profile.directReferrals')}</p>
               <p className="font-title-sm text-title-sm text-on-surface">42</p>
             </div>
             <div>
-              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">Team Size</p>
+              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">{t('profile.teamSize')}</p>
               <p className="font-title-sm text-title-sm text-on-surface">1,284</p>
             </div>
             <div>
-              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">Total Earnings</p>
+              <p className="font-label-caps text-label-caps text-on-surface-variant mb-xs">{t('profile.totalEarnings')}</p>
               <p className="font-title-sm text-title-sm text-primary">$45,250.00</p>
             </div>
           </div>
@@ -76,9 +79,9 @@ function Profile({
         {/* Tabs */}
         <div className="flex border-b border-outline-variant overflow-x-auto hide-scrollbar bg-surface-container-lowest">
           {[
-            { id: 'personal', label: 'Personal Info' },
-            { id: 'bank', label: 'Bank Details' },
-            { id: 'kyc', label: 'KYC Verification' }
+            { id: 'personal', label: t('profile.personalTab') },
+            { id: 'bank', label: t('profile.bankTab') },
+            { id: 'kyc', label: t('profile.kycTab') }
           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (

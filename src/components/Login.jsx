@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 function Login({ setRoute, triggerToast }) {
   const { login } = useAuth();
-  const { t } = useLanguage();
+  const { t, locale, switchLanguage } = useLanguage();
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,14 +41,21 @@ function Login({ setRoute, triggerToast }) {
     <div className="min-h-screen flex items-center justify-center p-4 bg-background animate-fade-in transition-colors duration-200">
       <div className="w-full max-w-[440px] bg-cream border border-sand rounded-2xl shadow-lg p-8 space-y-6">
         
-        {/* Back to Home Navigation */}
-        <div className="flex items-center pb-3 border-b border-sand/60">
+        {/* Back to Home & Language Switcher Navigation */}
+        <div className="flex items-center justify-between pb-3 border-b border-sand/60">
           <button
             onClick={() => setRoute('landing')}
             className="flex items-center gap-1.5 text-[13px] font-semibold text-warm-gray hover:text-primary transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
             {t('common.backToHome')}
+          </button>
+          <button 
+            onClick={() => switchLanguage(locale === 'en' ? 'hi' : 'en')}
+            className="h-7 px-2.5 rounded-lg bg-bone border border-sand hover:bg-ivory text-[11px] font-semibold text-espresso transition-all flex items-center gap-1 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[14px] text-gold">translate</span>
+            <span>{locale === 'en' ? 'EN | हिंदी' : 'हिंदी | EN'}</span>
           </button>
         </div>
 

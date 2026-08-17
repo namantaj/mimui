@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 function Settings({ 
   darkMode, 
@@ -7,6 +8,7 @@ function Settings({
   setLanguage, 
   triggerToast 
 }) {
+  const { t, locale, switchLanguage } = useLanguage();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -46,6 +48,8 @@ function Settings({
 
   const handleLanguageChange = (e) => {
     const selectedLang = e.target.value;
+    const targetLocale = selectedLang === 'Hindi' || selectedLang === 'हिंदी' ? 'hi' : 'en';
+    switchLanguage(targetLocale);
     setLanguage(selectedLang);
     triggerToast(`Language switched to ${selectedLang}`);
   };
@@ -54,8 +58,8 @@ function Settings({
     <div className="space-y-lg animate-fade-in">
       {/* Title Header */}
       <div>
-        <h2 className="font-display-lg text-display-lg text-on-surface mb-xs">Portal Settings</h2>
-        <p className="font-body-md text-body-md text-on-surface-variant">Configure security permissions, alert channels, and personalized details.</p>
+        <h2 className="font-display-lg text-display-lg text-on-surface mb-xs">{t('settings.title')}</h2>
+        <p className="font-body-md text-body-md text-on-surface-variant">{t('settings.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
@@ -64,11 +68,11 @@ function Settings({
           
           {/* Security Form Card */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
-            <h3 className="font-title-sm text-title-sm text-on-surface mb-md">Security & Credentials</h3>
+            <h3 className="font-title-sm text-title-sm text-on-surface mb-md">{t('settings.securityHeader')}</h3>
             
             <form onSubmit={handlePasswordSubmit} className="space-y-md max-w-[480px]">
               <div className="space-y-xs">
-                <label className="font-label-caps text-label-caps text-on-surface-variant">Current Password</label>
+                <label className="font-label-caps text-label-caps text-on-surface-variant">{t('settings.currentPassword')}</label>
                 <input 
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
@@ -78,7 +82,7 @@ function Settings({
               </div>
 
               <div className="space-y-xs">
-                <label className="font-label-caps text-label-caps text-on-surface-variant">New Password</label>
+                <label className="font-label-caps text-label-caps text-on-surface-variant">{t('settings.newPassword')}</label>
                 <input 
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
@@ -88,7 +92,7 @@ function Settings({
               </div>
 
               <div className="space-y-xs">
-                <label className="font-label-caps text-label-caps text-on-surface-variant">Confirm New Password</label>
+                <label className="font-label-caps text-label-caps text-on-surface-variant">{t('settings.confirmNewPassword')}</label>
                 <input 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -102,7 +106,7 @@ function Settings({
                   type="submit"
                   className="px-xl py-sm rounded-lg bg-primary text-on-primary font-body-sm text-body-sm font-semibold hover:opacity-95 transition-all shadow-md cursor-pointer"
                 >
-                  Update Password
+                  {t('settings.updatePasswordBtn')}
                 </button>
               </div>
             </form>
@@ -110,20 +114,18 @@ function Settings({
 
           {/* Regional and Language Card */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
-            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">Regional Settings</h3>
-            <p className="text-body-sm text-on-surface-variant mb-md">Select your preferred default language interface for commission sheets.</p>
+            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">{t('settings.regionalHeader')}</h3>
+            <p className="text-body-sm text-on-surface-variant mb-md">{t('settings.regionalSubtitle')}</p>
             
             <div className="space-y-xs max-w-[480px]">
-              <label className="font-label-caps text-label-caps text-on-surface-variant">System Language</label>
+              <label className="font-label-caps text-label-caps text-on-surface-variant">{t('settings.systemLanguage')}</label>
               <select 
-                value={language}
+                value={locale === 'hi' ? 'Hindi' : 'English'}
                 onChange={handleLanguageChange}
                 className="w-full h-10 px-md rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface font-body-md text-body-md transition-shadow appearance-none"
               >
-                <option>English</option>
-                <option>Hindi</option>
-                <option>Spanish</option>
-                <option>French</option>
+                <option value="English">English</option>
+                <option value="Hindi">हिंदी (Hindi)</option>
               </select>
             </div>
           </div>
@@ -135,11 +137,11 @@ function Settings({
           
           {/* Theme Mode Card */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
-            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">Display Theme</h3>
-            <p className="text-body-sm text-on-surface-variant mb-md">Choose between light and dark display modes for optimization.</p>
+            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">{t('settings.displayThemeHeader')}</h3>
+            <p className="text-body-sm text-on-surface-variant mb-md">{t('settings.displayThemeSubtitle')}</p>
             
             <div className="flex items-center justify-between py-sm">
-              <span className="font-bold text-body-sm text-on-surface">Dark Mode Interface</span>
+              <span className="font-bold text-body-sm text-on-surface">{t('settings.darkModeLabel')}</span>
               <button 
                 type="button"
                 onClick={toggleDarkMode}
@@ -152,11 +154,11 @@ function Settings({
 
           {/* 2FA Card */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
-            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">Multi-Factor Authentication</h3>
-            <p className="text-body-sm text-on-surface-variant mb-md">Add an extra layer of protection to your commission wallet withdrawals.</p>
+            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">{t('settings.mfaHeader')}</h3>
+            <p className="text-body-sm text-on-surface-variant mb-md">{t('settings.mfaSubtitle')}</p>
             
             <div className="flex items-center justify-between py-sm">
-              <span className="font-bold text-body-sm text-on-surface">Enable 2FA (Authenticator App)</span>
+              <span className="font-bold text-body-sm text-on-surface">{t('settings.enable2fa')}</span>
               <button 
                 type="button"
                 onClick={handle2FAToggle}
@@ -169,14 +171,14 @@ function Settings({
 
           {/* Notifications Card */}
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
-            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">Notification Channels</h3>
-            <p className="text-body-sm text-on-surface-variant mb-md">Select your preferred alert channels for transaction receipts and team growth.</p>
+            <h3 className="font-title-sm text-title-sm text-on-surface mb-xs">{t('settings.notifHeader')}</h3>
+            <p className="text-body-sm text-on-surface-variant mb-md">{t('settings.notifSubtitle')}</p>
             
             <div className="space-y-sm">
               <div className="flex items-center justify-between py-sm border-b border-outline-variant/30">
                 <div>
-                  <h4 className="font-bold text-body-sm text-on-surface">Email Notifications</h4>
-                  <p className="text-xs text-on-surface-variant">Weekly business digest, payout receipts</p>
+                  <h4 className="font-bold text-body-sm text-on-surface">{t('settings.emailNotifs')}</h4>
+                  <p className="text-xs text-on-surface-variant">{t('settings.emailNotifsDesc')}</p>
                 </div>
                 <button 
                   type="button"
@@ -189,8 +191,8 @@ function Settings({
 
               <div className="flex items-center justify-between py-sm border-b border-outline-variant/30">
                 <div>
-                  <h4 className="font-bold text-body-sm text-on-surface">SMS Alerts</h4>
-                  <p className="text-xs text-on-surface-variant">Instant messages on downline recruitment</p>
+                  <h4 className="font-bold text-body-sm text-on-surface">{t('settings.smsAlerts')}</h4>
+                  <p className="text-xs text-on-surface-variant">{t('settings.smsAlertsDesc')}</p>
                 </div>
                 <button 
                   type="button"
