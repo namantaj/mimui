@@ -24,7 +24,7 @@ function Login({ setRoute, triggerToast }) {
     try {
       await login(emailOrPhone.trim(), password);
       triggerToast('Logged in successfully!');
-      setRoute('dashboard'); // Redirect to dashboard
+      setRoute('policy'); // Redirect to policy screen before dashboard
     } catch (err) {
       setSubmitError(err.message || 'Login failed. Please check your credentials.');
     } finally {

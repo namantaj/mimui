@@ -88,7 +88,7 @@ function Signup({ setRoute, triggerToast }) {
   };
 
   const handleProceed = () => {
-    setRoute('dashboard');
+    setRoute('policy');
   };
 
   // If successfully registered, show referral code info card

@@ -9,11 +9,12 @@ import Settings from './components/Settings';
 import LandingPage from './components/LandingPage';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import CompanyPolicy from './components/CompanyPolicy';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useLanguage } from './context/LanguageContext';
 
 function AppContent() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, hasAcceptedPolicy, hasCompletedProfile, user, logout } = useAuth();
   const { t, locale, switchLanguage } = useLanguage();
   const [activeTab, setActiveTab] = useState('personal'); // 'personal', 'bank', 'kyc'
   
@@ -42,18 +43,23 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // Enforce Protected Routes
+  // Enforce Protected Routes & Mandatory Flow
   const isPublicRoute = activeMenu === 'landing' || activeMenu === 'login' || activeMenu === 'signup';
 
   useEffect(() => {
     if (!isPublicRoute && !isAuthenticated) {
       setRoute('login');
+    } else if (isAuthenticated && !hasAcceptedPolicy && activeMenu !== 'policy') {
+      setRoute('policy');
+    } else if (isAuthenticated && hasAcceptedPolicy && !hasCompletedProfile && activeMenu !== 'profile') {
+      setRoute('profile');
     }
-  }, [activeMenu, isAuthenticated, isPublicRoute]);
+  }, [activeMenu, isAuthenticated, hasAcceptedPolicy, hasCompletedProfile, isPublicRoute]);
 
   useEffect(() => {
     const titles = {
       landing: 'Bhagwn Solutions - Preserving Wealth, Empowering Growth',
+      policy: 'Bhagwn Solutions - Company Policy',
       dashboard: 'Bhagwn Solutions - Executive Dashboard',
       business: 'Bhagwn Solutions - My Business',
       wallet: 'Bhagwn Solutions - Financial Wallet',
@@ -77,15 +83,21 @@ function AppContent() {
   // Form states initialized with defaults, updated when mock user logs in
   const [profileForm, setProfileForm] = useState({
     fullName: 'Alexander Wright',
+    fatherOrHusbandName: 'Robert Wright',
+    motherName: 'Eleanor Wright',
     email: 'alexander.wright@mlmenterprise.com',
-    phone: '(555) 123-4567',
+    phone: '6393552408',
     dob: '1985-06-15',
     gender: 'Male',
+    nationality: 'Indian',
+    aadhaarNumber: '9842 1234 5678',
     street: '1234 Silicon Valley Blvd, Suite 200',
     city: 'San Francisco',
     state: 'CA',
     zip: '94105',
-    country: 'United States'
+    country: 'United States',
+    nomineeName: 'Catherine Wright',
+    nomineeRelation: 'Spouse'
   });
 
   useEffect(() => {
@@ -94,17 +106,19 @@ function AppContent() {
         ...prev,
         fullName: user.fullName,
         email: user.email,
-        phone: user.phone
+        phone: user.phone || prev.phone
       }));
     }
   }, [user]);
 
   const [bankForm, setBankForm] = useState({
-    bankName: 'Chase Bank',
-    accountNumber: '•••• •••• •••• 5678',
+    bankName: 'State Bank of India',
+    accountNumber: '38491029485',
     holderName: 'Alexander Wright',
-    ifscCode: 'CHASUS33XX',
-    accountType: 'Savings'
+    ifscCode: 'SBIN0001234',
+    accountType: 'Savings',
+    paytmPhonePe: '9876543210@paytm',
+    paymentMobile: '+91 98765 43210'
   });
 
   useEffect(() => {
@@ -115,6 +129,19 @@ function AppContent() {
       }));
     }
   }, [user]);
+
+  const [planForm, setPlanForm] = useState({
+    planName: 'Daily Return Plan',
+    schemeAmount: '1,00,000',
+    referenceId: 'REF-847291',
+    referenceName: 'Vikram Sharma',
+    referralCode: 'REF1001',
+    sourceOfIncome: 'Business / Self-Employed',
+    businessDetail: 'Financial Consultancy & Advisory Services',
+    serviceDetail: 'Executive Wealth Portfolio Management',
+    regDate: '2021-10-12',
+    regPlace: 'Head Office (New Delhi)'
+  });
 
   const [kycForm, setKycForm] = useState({
     docType: 'Passport',
@@ -144,6 +171,11 @@ function AppContent() {
     setBankForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handlePlanChange = (e) => {
+    const { name, value } = e.target;
+    setPlanForm(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleKycChange = (e) => {
     const { name, value } = e.target;
     setKycForm(prev => ({ ...prev, [name]: value }));
@@ -157,6 +189,11 @@ function AppContent() {
   const handleBankSubmit = (e) => {
     e.preventDefault();
     triggerToast('Bank Details Updated successfully!');
+  };
+
+  const handlePlanSubmit = (e) => {
+    e.preventDefault();
+    triggerToast('Plan & Referral Information Updated successfully!');
   };
 
   const handleKycSubmit = (e) => {
@@ -184,7 +221,7 @@ function AppContent() {
         )}
         <LandingPage 
           onGetStarted={() => {
-            setRoute(isAuthenticated ? 'dashboard' : 'login');
+            setRoute(isAuthenticated ? (hasAcceptedPolicy ? 'dashboard' : 'policy') : 'login');
           }} 
           setRoute={setRoute}
           triggerToast={triggerToast}
@@ -223,6 +260,22 @@ function AppContent() {
           </div>
         )}
         <Signup setRoute={setRoute} triggerToast={triggerToast} />
+      </div>
+    );
+  }
+
+  if (activeMenu === 'policy') {
+    return (
+      <div className="min-h-screen bg-background text-on-background font-body-md text-body-md antialiased transition-colors duration-200">
+        {toast.show && (
+          <div className="fixed bottom-5 right-5 z-50 flex items-center gap-md px-lg py-md rounded-lg shadow-xl bg-surface-container-lowest border border-outline-variant animate-bounce">
+            <span className={`material-symbols-outlined ${toast.type === 'success' ? 'text-tertiary' : 'text-primary'}`}>
+              {toast.type === 'success' ? 'check_circle' : 'info'}
+            </span>
+            <span className="font-semibold text-body-sm">{toast.message}</span>
+          </div>
+        )}
+        <CompanyPolicy setRoute={setRoute} triggerToast={triggerToast} />
       </div>
     );
   }
@@ -268,22 +321,42 @@ function AppContent() {
               { id: 'settings', icon: 'settings', label: t('nav.systemSettings') }
             ].map((item) => {
               const isActive = activeMenu === item.id;
+              const isLocked = !hasCompletedProfile && item.id !== 'profile';
+
               return (
                 <li key={item.id}>
                   <button
+                    type="button"
                     onClick={() => {
+                      if (isLocked) {
+                        triggerToast(t('profile.lockedNavNotice'), 'info');
+                        return;
+                      }
                       setRoute(item.id);
                     }}
-                    className={`w-full flex items-center gap-3 px-4 py-[10px] rounded-lg text-[14px] transition-all duration-200 cursor-pointer ${
-                      isActive 
-                        ? 'bg-primary text-on-primary font-semibold shadow-sm' 
-                        : 'text-warm-gray hover:text-espresso hover:bg-ivory/60 font-medium'
+                    className={`w-full flex items-center justify-between px-4 py-[10px] rounded-lg text-[14px] transition-all duration-200 ${
+                      isLocked 
+                        ? 'text-warm-gray/60 bg-bone/40 cursor-not-allowed opacity-70'
+                        : isActive 
+                          ? 'bg-primary text-on-primary font-semibold shadow-sm cursor-pointer' 
+                          : 'text-warm-gray hover:text-espresso hover:bg-ivory/60 font-medium cursor-pointer'
                     }`}
+                    title={isLocked ? t('profile.lockedTooltip') : item.label}
                   >
-                    <span className={`material-symbols-outlined text-[20px] ${isActive ? 'filled-icon' : ''}`}>
-                      {item.icon}
-                    </span>
-                    <span>{item.label}</span>
+                    <div className="flex items-center gap-3">
+                      <span className={`material-symbols-outlined text-[20px] ${isActive ? 'filled-icon' : ''}`}>
+                        {item.icon}
+                      </span>
+                      <span>{item.label}</span>
+                    </div>
+
+                    {isLocked ? (
+                      <span className="material-symbols-outlined text-[16px] text-warm-gray/60">lock</span>
+                    ) : item.id === 'profile' && !hasCompletedProfile ? (
+                      <span className="text-[10px] font-bold bg-gold text-white px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">
+                        Required
+                      </span>
+                    ) : null}
                   </button>
                 </li>
               );
@@ -451,6 +524,7 @@ function AppContent() {
           {activeMenu === 'wallet' && <Wallet triggerToast={triggerToast} />}
           {activeMenu === 'profile' && (
             <Profile 
+              setRoute={setRoute}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               profileForm={profileForm}
@@ -459,6 +533,9 @@ function AppContent() {
               bankForm={bankForm}
               handleBankChange={handleBankChange}
               handleBankSubmit={handleBankSubmit}
+              planForm={planForm}
+              handlePlanChange={handlePlanChange}
+              handlePlanSubmit={handlePlanSubmit}
               kycForm={kycForm}
               handleKycChange={handleKycChange}
               handleKycSubmit={handleKycSubmit}
