@@ -1,6 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../lib/supabase';
+
+const INVESTMENT_PLANS = [
+  {
+    id: 'p1',
+    title: 'ONE-TIME INVESTMENT',
+    tag: 'ONE-TIME CONTRIBUTION',
+    badge: 'Starting ₹25,000',
+    amount: 25000,
+    formattedAmount: '25,000',
+    desc: 'Structured lump-sum contribution for investors who prefer one-time deposits across growth sectors.'
+  },
+  {
+    id: 'p2',
+    title: 'DAILY INVESTMENT PLAN',
+    tag: 'DAILY CONTRIBUTION',
+    badge: 'From ₹10/day',
+    amount: 3600,
+    formattedAmount: '3,600',
+    desc: 'Disciplined savings model with micro daily contributions (₹10/day x 360 days).'
+  },
+  {
+    id: 'p3',
+    title: 'DAILY RETURN PLAN',
+    tag: 'DAILY RETURN',
+    badge: 'Daily Return Option',
+    amount: 100000,
+    formattedAmount: '1,00,000',
+    desc: 'Capital investment option offering regular daily return payouts and promotional tiers.'
+  },
+  {
+    id: 'p4',
+    title: 'FLEXI SAVING PLAN',
+    tag: 'FLEXIBLE SAVING',
+    badge: 'From ₹50/day',
+    amount: 10500,
+    formattedAmount: '10,500',
+    desc: 'Flexible daily saving scheme for 210 days (7 months) with 9-month maturity cycle.'
+  },
+  {
+    id: 'p5',
+    title: 'TERM DEPOSIT PLAN',
+    tag: 'TERM DEPOSIT',
+    badge: '1 • 2 • 3 YEARS',
+    amount: 60000,
+    formattedAmount: '60,000',
+    desc: 'Monthly investment (₹5,000/month for 1 year) across 1, 2, and 3-year tenures.'
+  },
+  {
+    id: 'p6',
+    title: 'POCKET-FRIENDLY PLAN',
+    tag: 'MICRO SAVING',
+    badge: 'From ₹10/day',
+    amount: 4500,
+    formattedAmount: '4,500',
+    desc: 'Affordable micro-saving entry point (450 days deposit) with multi-phase returns.'
+  }
+];
 
 function Profile({
   setRoute,
@@ -15,101 +73,337 @@ function Profile({
   planForm,
   handlePlanChange,
   handlePlanSubmit,
-  kycForm,
-  handleKycChange,
-  handleKycSubmit,
+  documentsForm,
+  setDocumentsForm,
   triggerToast
 }) {
-  const { hasCompletedProfile, completeProfile } = useAuth();
+  const { user, hasCompletedProfile, completeProfile } = useAuth();
   const { t } = useLanguage();
-  
-  // Visibility Toggles for Sensitive Fields (Aadhaar & Bank Account Number)
-  const [showAadhaar, setShowAadhaar] = useState(false);
-  const [showAccountNum, setShowAccountNum] = useState(false);
 
-  // Helper to format/mask Aadhaar
-  const getMaskedAadhaar = (val) => {
-    if (!val) return 'XXXX XXXX 1234';
-    if (showAadhaar) return val;
-    const clean = val.replace(/\s+/g, '');
-    if (clean.length >= 4) {
-      return `XXXX XXXX ${clean.slice(-4)}`;
-    }
-    return 'XXXX XXXX 1234';
-  };
+  const [submittingProfile, setSubmittingProfile] = useState(false);
+  const [submittingPayment, setSubmittingPayment] = useState(false);
 
-  // Helper to format/mask Bank Account
-  const getMaskedAccount = (val) => {
-    if (!val) return '•••• •••• •••• 5678';
-    if (showAccountNum) return val;
-    const clean = val.replace(/\s+/g, '');
-    if (clean.length >= 4) {
-      return `•••• •••• •••• ${clean.slice(-4)}`;
-    }
-    return '•••• •••• •••• 5678';
-  };
+  // Upload States for Real Supabase Storage
+  const [uploadingAadhaar, setUploadingAadhaar] = useState(false);
+  const [uploadingPassbook, setUploadingPassbook] = useState(false);
 
-  // Calculate Required Field Progress during Onboarding
-  const requiredFieldValues = [
-    profileForm.fullName,
-    profileForm.fatherOrHusbandName,
-    profileForm.motherName,
-    profileForm.email,
-    profileForm.phone,
-    profileForm.dob,
-    profileForm.gender,
-    profileForm.nationality,
-    profileForm.aadhaarNumber,
-    profileForm.street,
-    profileForm.city,
-    profileForm.state,
-    profileForm.zip,
-    profileForm.country,
-    profileForm.nomineeName,
-    profileForm.nomineeRelation,
-    bankForm.bankName,
-    bankForm.accountNumber,
-    bankForm.holderName,
-    bankForm.ifscCode,
-    bankForm.accountType,
-    planForm.planName,
-    planForm.schemeAmount
+  // Required Personal Info Fields
+  const requiredPersonalFields = [
+    { key: 'fullName', label: 'Full Name', value: profileForm.fullName || user?.fullName },
+    { key: 'fatherOrHusbandName', label: "Father's / Husband's Name", value: profileForm.fatherOrHusbandName },
+    { key: 'motherName', label: "Mother's Name", value: profileForm.motherName },
+    { key: 'email', label: 'Email Address', value: profileForm.email || user?.email },
+    { key: 'phone', label: 'Phone Number', value: profileForm.phone || user?.phone },
+    { key: 'dob', label: 'Date of Birth', value: profileForm.dob },
+    { key: 'gender', label: 'Gender', value: profileForm.gender || 'Male' },
+    { key: 'nationality', label: 'Nationality', value: profileForm.nationality || 'Indian' },
+    { key: 'aadhaarNumber', label: 'Aadhaar Card Number', value: profileForm.aadhaarNumber },
+    { key: 'street', label: 'Street Address', value: profileForm.street },
+    { key: 'city', label: 'City', value: profileForm.city },
+    { key: 'state', label: 'State / Province', value: profileForm.state },
+    { key: 'zip', label: 'Pincode / Zip', value: profileForm.zip },
+    { key: 'country', label: 'Country', value: profileForm.country || 'India' },
+    { key: 'nomineeName', label: 'Nominee Name', value: profileForm.nomineeName },
+    { key: 'nomineeRelation', label: 'Nominee Relationship', value: profileForm.nomineeRelation }
   ];
 
-  const filledCount = requiredFieldValues.filter(val => val && String(val).trim() !== '').length;
-  const totalRequired = requiredFieldValues.length;
-  const progressPercentage = Math.round((filledCount / totalRequired) * 100);
-  const isProfileCompleteValid = filledCount === totalRequired;
+  const missingPersonalFields = requiredPersonalFields.filter(
+    field => !field.value || String(field.value).trim() === ''
+  );
 
-  const handleFinalCompletion = (e) => {
-    if (e) e.preventDefault();
-    if (!isProfileCompleteValid) {
-      triggerToast('Please complete all required fields (* Required) before unlocking the portal!', 'info');
+  const isPersonalComplete = missingPersonalFields.length === 0;
+
+  const bankHolderName =
+    bankForm.holderName?.trim() ||
+    bankForm.accountHolderName?.trim() ||
+    profileForm.fullName?.trim() ||
+    user?.fullName ||
+    '';
+
+  const isBankComplete =
+    !!bankForm.bankName?.trim() &&
+    !!bankForm.accountNumber?.trim() &&
+    !!bankHolderName.trim() &&
+    !!bankForm.ifscCode?.trim();
+
+  const aadhaarUrl = documentsForm?.aadhaarUrl || user?.aadhaarDocumentUrl || '';
+  const passbookUrl = documentsForm?.passbookUrl || user?.passbookDocumentUrl || '';
+
+  const isDocumentsComplete = !!aadhaarUrl.trim() && !!passbookUrl.trim();
+
+  const isProfileCompleteValid = isPersonalComplete && isBankComplete && isDocumentsComplete;
+
+  // Debug Console Logging for Onboarding Completion Conditions
+  useEffect(() => {
+    console.log('[Profile Completion Debug]', {
+      isPersonalComplete,
+      missingPersonalFields: missingPersonalFields.map(f => f.key),
+      isBankComplete,
+      bankName: bankForm.bankName,
+      accountNumber: bankForm.accountNumber,
+      holderName: bankHolderName,
+      ifscCode: bankForm.ifscCode,
+      aadhaarUrl,
+      passbookUrl,
+      isDocumentsComplete,
+      isProfileCompleteValid
+    });
+  }, [
+    isPersonalComplete,
+    isBankComplete,
+    aadhaarUrl,
+    passbookUrl,
+    isDocumentsComplete,
+    isProfileCompleteValid
+  ]);
+
+  // Onboarding Completion Calculation
+  const totalOnboardingSteps = 4;
+  let completedOnboardingSteps = 0;
+  if (isPersonalComplete) completedOnboardingSteps += 1;
+  if (isBankComplete) completedOnboardingSteps += 1;
+  if (aadhaarUrl) completedOnboardingSteps += 1;
+  if (passbookUrl) completedOnboardingSteps += 1;
+
+  const progressPercentage = Math.round((completedOnboardingSteps / totalOnboardingSteps) * 100);
+
+  // REAL SUPABASE STORAGE UPLOAD HANDLER
+  const handleFileUpload = async (e, type) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate File Type
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type.toLowerCase())) {
+      triggerToast('Invalid file format. Please upload PDF, JPG, JPEG, or PNG files.', 'error');
       return;
     }
-    completeProfile();
-    triggerToast(
-      t('profile.profileCompletedTitle') || 'Profile Setup Completed ✓ Executive Dashboard Unlocked!'
-    );
-    if (setRoute) {
-      setRoute('dashboard');
+
+    // Validate File Size (Max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      triggerToast('File size exceeds 10MB. Please choose a smaller file.', 'error');
+      return;
     }
+
+    if (!user?.id) {
+      triggerToast('You must be logged in to upload documents.', 'error');
+      return;
+    }
+
+    const isAadhaar = type === 'aadhaar';
+    if (isAadhaar) setUploadingAadhaar(true);
+    else setUploadingPassbook(true);
+
+    const bucketName = 'Members-document';
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const filePath = `members/${user.id}/${type}/${Date.now()}_${sanitizedName}`;
+
+    console.log('Current user:', user?.id);
+    console.log(`Selected ${type} file:`, file);
+    console.log('Storage bucket:', bucketName);
+    console.log('Upload path:', filePath);
+
+    try {
+      const { data, error: uploadErr } = await supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      console.log('Storage upload result:', data, uploadErr);
+
+      if (uploadErr) {
+        console.error('Supabase Storage Upload Error:', uploadErr);
+        throw new Error(uploadErr.message || `Failed to upload ${type} document to Supabase storage bucket '${bucketName}'.`);
+      }
+
+      const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+      const documentPath = publicUrlData?.publicUrl || filePath;
+
+      console.log('Document URL/path after upload:', documentPath);
+
+      // Update Supabase members database table
+      const updateColumn = isAadhaar ? 'aadhaar_document_url' : 'passbook_document_url';
+      const { error: dbError } = await supabase
+        .from('members')
+        .update({
+          [updateColumn]: documentPath,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (dbError) {
+        console.error('Database record update error:', dbError);
+        throw new Error(dbError.message || 'Failed to save document path in member record.');
+      }
+
+      // Update local state
+      setDocumentsForm(prev => ({
+        ...prev,
+        [isAadhaar ? 'aadhaarUrl' : 'passbookUrl']: documentPath,
+        [updateColumn]: documentPath
+      }));
+
+      const updatedAadhaar = isAadhaar ? documentPath : aadhaarUrl;
+      const updatedPassbook = !isAadhaar ? documentPath : passbookUrl;
+
+      console.log('Completion state:', {
+        isPersonalComplete,
+        isBankComplete,
+        aadhaarUrl: updatedAadhaar,
+        passbookUrl: updatedPassbook,
+        isProfileCompleteValid: isPersonalComplete && isBankComplete && !!updatedAadhaar && !!updatedPassbook
+      });
+
+      triggerToast(`${isAadhaar ? 'Aadhaar Card' : 'Passbook Photo'} uploaded successfully!`, 'success');
+    } catch (err) {
+      console.error('Storage upload error:', err);
+      triggerToast(err.message || 'Document upload failed. Please try again.', 'error');
+    } finally {
+      if (isAadhaar) setUploadingAadhaar(false);
+      else setUploadingPassbook(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  // FINAL PROFILE COMPLETION HANDLER
+  const handleFinalCompletion = async (e) => {
+    if (e) e.preventDefault();
+
+    if (!isProfileCompleteValid) {
+      const missing = [];
+      if (!isPersonalComplete) missing.push('Personal Details');
+      if (!isBankComplete) missing.push('Bank Details');
+      if (!documentsForm.aadhaarUrl && !user?.aadhaarDocumentUrl) missing.push('Aadhaar Card Upload');
+      if (!documentsForm.passbookUrl && !user?.passbookDocumentUrl) missing.push('Passbook Photo Upload');
+
+      triggerToast(`Please complete required section(s): ${missing.join(', ')}`, 'info');
+      return;
+    }
+
+    if (submittingProfile) return;
+
+    try {
+      setSubmittingProfile(true);
+
+      if (user?.id) {
+        const { error: updateError } = await supabase
+          .from('members')
+          .update({
+            full_name: profileForm.fullName?.trim() || null,
+            father_or_husband_name: profileForm.fatherOrHusbandName?.trim() || null,
+            mother_name: profileForm.motherName?.trim() || null,
+            email: profileForm.email?.trim()?.toLowerCase() || user.email || null,
+            phone: profileForm.phone?.trim() || null,
+            date_of_birth: profileForm.dob || null,
+            gender: profileForm.gender || null,
+            nationality: profileForm.nationality?.trim() || null,
+            aadhaar_number: profileForm.aadhaarNumber?.trim() || null,
+            address: profileForm.street?.trim() || null,
+            city: profileForm.city?.trim() || null,
+            state: profileForm.state?.trim() || null,
+            pincode: profileForm.zip?.trim() || null,
+            country: profileForm.country?.trim() || null,
+            nominee_name: profileForm.nomineeName?.trim() || null,
+            nominee_relation: profileForm.nomineeRelation?.trim() || null,
+            bank_name: bankForm.bankName?.trim() || null,
+            account_number: bankForm.accountNumber?.trim() || null,
+            account_holder_name: bankForm.holderName?.trim() || null,
+            ifsc_code: bankForm.ifscCode?.trim() || null,
+            branch_name: bankForm.branchName?.trim() || null,
+            profile_completed: true,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        if (updateError) {
+          throw new Error(updateError.message || 'Failed to update database profile.');
+        }
+      }
+
+      await completeProfile();
+      triggerToast('Profile completed successfully! Dashboard unlocked.', 'success');
+
+      if (setRoute) {
+        setRoute('dashboard');
+      }
+    } catch (error) {
+      console.error('Profile completion error:', error);
+      triggerToast(error?.message || 'Unable to complete profile. Please try again.', 'error');
+    } finally {
+      setSubmittingProfile(false);
+    }
+  };
+
+  // PAYMENT SUBMISSION HANDLER
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!user?.id) {
+      triggerToast('You must be logged in to submit payment.', 'error');
+      return;
+    }
+
+    if (!planForm.planName) {
+      triggerToast('Please select an investment plan first.', 'error');
+      return;
+    }
+
+    if (!planForm.paymentReference?.trim()) {
+      triggerToast('Please enter your payment reference / transaction ID.', 'error');
+      return;
+    }
+
+    try {
+      setSubmittingPayment(true);
+
+      const { error } = await supabase
+        .from('members')
+        .update({
+          membership_plan: planForm.planName,
+          plan_name: planForm.planName,
+          plan_amount: planForm.schemeAmount || null,
+          scheme_amount: planForm.schemeAmount || null,
+          payment_reference: planForm.paymentReference.trim(),
+          payment_status: 'pending',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        throw new Error(error.message || 'Failed to submit payment details.');
+      }
+
+      triggerToast('Payment details submitted successfully! Verification is pending.', 'success');
+    } catch (err) {
+      console.error('Payment submission error:', err);
+      triggerToast(err.message || 'Payment submission failed.', 'error');
+    } finally {
+      setSubmittingPayment(false);
+    }
+  };
+
+  // Select Plan Handler
+  const handleSelectPlan = (plan) => {
+    handlePlanChange({ target: { name: 'planName', value: plan.title } });
+    handlePlanChange({ target: { name: 'schemeAmount', value: String(plan.amount) } });
+    triggerToast(`Selected Plan: ${plan.title} (₹ ${plan.formattedAmount})`, 'info');
   };
 
   return (
     <div className="space-y-6">
-      
+
       {/* ONBOARDING MANDATORY WIZARD HEADER (Shown when profile is incomplete) */}
       {!hasCompletedProfile && (
         <div className="bg-gradient-to-r from-[#7D1F2B] via-primary to-[#641722] text-on-primary rounded-2xl px-6 sm:px-8 py-5 sm:py-6 shadow-lg border border-gold/40 relative overflow-hidden">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative z-10">
-            
-            {/* LEFT — Main Information (60-65% width) */}
+
             <div className="flex-1 md:max-w-[65%] space-y-1.5">
-              {/* Badges Row */}
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold bg-black/35 px-2.5 py-0.5 rounded border border-gold/30">
-                  {t('profile.stepBadge') || 'STEP 2 OF 2 — REQUIRED ONBOARDING'}
+                  STEP 2 OF 2 — REQUIRED ONBOARDING
                 </span>
                 <span className="text-[10px] font-bold tracking-[0.15em] uppercase bg-red-600/90 text-white px-2.5 py-0.5 rounded flex items-center gap-1">
                   <span className="material-symbols-outlined text-[12px]">lock</span>
@@ -117,18 +411,15 @@ function Profile({
                 </span>
               </div>
 
-              {/* Title */}
               <h1 className="text-2xl sm:text-3xl font-extrabold text-cream tracking-tight leading-snug">
-                {t('profile.onboardingTitle') || 'Complete Your Profile'}
+                Complete Your Profile & Documents
               </h1>
-              
-              {/* Subtitle / Description (Normal horizontal paragraph width) */}
+
               <p className="text-sm sm:text-base text-cream/90 font-medium leading-relaxed">
-                {t('profile.onboardingSubtitle') || 'Please complete your profile details before accessing the Executive Portal.'}
+                Please complete your Personal Info, Bank Details, Aadhaar Card, and Passbook Photo to unlock the Executive Portal.
               </p>
             </div>
 
-            {/* RIGHT — Compact Completion Status Panel */}
             <div className="w-full md:w-[32%] shrink-0">
               <div className="bg-black/25 backdrop-blur-md p-3.5 sm:p-4 rounded-xl border border-white/15 space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-bold text-cream">
@@ -136,90 +427,77 @@ function Profile({
                   <span className="text-gold font-mono text-base font-extrabold">{progressPercentage}%</span>
                 </div>
 
-                {/* Progress Bar */}
                 <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className="h-full bg-gradient-to-r from-gold to-amber-400 rounded-full transition-all duration-500"
                     style={{ width: `${progressPercentage}%` }}
                   ></div>
                 </div>
 
                 <p className="text-[11px] text-cream/80 font-medium text-right">
-                  {filledCount} of {totalRequired} required fields completed
+                  {completedOnboardingSteps} of {totalOnboardingSteps} required sections completed
                 </p>
               </div>
             </div>
 
           </div>
 
-          {/* Bottom Status Message Line with Visible Divider */}
           <div className="mt-3.5 pt-3.5 border-t border-white/20 flex items-center gap-2 text-xs text-cream/90 font-medium">
             <span className="material-symbols-outlined text-[16px] text-gold shrink-0">lock</span>
             <span>
-              <strong className="text-gold font-semibold">Executive Portal is currently locked.</strong> Complete all required profile fields below to enable portal features.
+              <strong className="text-gold font-semibold">Executive Portal is currently locked.</strong> Complete all required sections below to enable full portal access.
             </span>
           </div>
         </div>
       )}
 
-      {/* 1. Executive Summary Header Card (Shown after onboarding is completed) */}
+      {/* EXECUTIVE SUMMARY HEADER CARD (Shown after onboarding is completed) */}
       {hasCompletedProfile && (
         <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-6 md:p-8 shadow-sm relative overflow-hidden">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
-            
-            {/* Avatar Picture */}
-            <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-surface shadow-sm relative shrink-0">
-              <img 
-                alt="Profile Picture" 
-                className="w-full h-full object-cover" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDe8oLmHDjQpBARIImVqHvbh-ono3iANmz82cN0HNIuMXp_uoyQ4ZIMNgWKt7U_gmgBcHnpsD9jOWfUuIIImIe_pzvTcDRcnmD2mUVk1twt8IvTMuNcV5CFoI61OZD5GEex2j1ycgdYeilCQ4ijjf1zAaULdttqOMrA3GCWb530NxxxkuKOMLU7dQf06irnQ0yH_Me8dAKADm-VLwOcU91AquzmvS_DdBPe3QK_9BC7ctdtEU_Xxje9"
-              />
-              <button 
-                type="button"
-                onClick={() => triggerToast("Upload avatar dialog coming soon!")}
-                className="absolute bottom-0 right-0 bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center hover:opacity-90 transition-colors shadow-md cursor-pointer"
-                title="Change Profile Photo"
-              >
-                <span className="material-symbols-outlined text-sm">edit</span>
-              </button>
+
+            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-surface shadow-sm relative shrink-0 bg-gradient-to-br from-primary to-[#641722] flex items-center justify-center text-white text-3xl font-black">
+              {profileForm.fullName ? profileForm.fullName.charAt(0).toUpperCase() : 'E'}
             </div>
 
-            {/* User Basic Info & Badges */}
             <div className="flex-1 text-center md:text-left w-full">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-extrabold text-on-surface mb-0.5">{profileForm.fullName}</h2>
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-on-surface mb-0.5">{profileForm.fullName || user?.fullName || 'Executive Partner'}</h2>
                   <p className="text-body-sm text-on-surface-variant font-medium">
-                    {profileForm.email} • <span className="font-mono text-espresso font-semibold">ID: MLM-847291</span>
+                    {profileForm.email || user?.email} • <span className="font-mono text-espresso font-semibold">ID: {user?.referralCode || 'EX-PARTNER'}</span>
                   </p>
                 </div>
                 <div className="flex gap-2 justify-center md:justify-end">
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-tertiary/10 text-tertiary text-xs font-bold border border-tertiary/20">
-                    <span className="material-symbols-outlined text-xs mr-1">check_circle</span> {t('profile.verified')}
+                    <span className="material-symbols-outlined text-xs mr-1">check_circle</span> Profile Complete
                   </span>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-bold border border-gold/20">
-                    Gold Executive Partner
-                  </span>
+                  {user?.membershipPlan && (
+                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-gold/10 text-gold text-xs font-bold border border-gold/20">
+                      {user.membershipPlan}
+                    </span>
+                  )}
                 </div>
               </div>
-              
-              {/* Executive Stats Row */}
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 border-t border-outline-variant pt-4">
                 <div>
-                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">{t('profile.joinDate')}</p>
-                  <p className="text-base font-bold text-on-surface">Oct 12, 2021</p>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">Membership Plan</p>
+                  <p className="text-sm font-bold text-on-surface">{user?.membershipPlan || planForm.planName || 'Not Selected'}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">{t('profile.directReferrals')}</p>
-                  <p className="text-base font-bold text-on-surface">42</p>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">Payment Status</p>
+                  <p className={`text-sm font-bold capitalize ${user?.paymentStatus === 'approved' ? 'text-forest' : user?.paymentStatus === 'pending' ? 'text-gold' : 'text-amber-700'}`}>
+                    {user?.paymentStatus || planForm.paymentStatus || 'unpaid'}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">{t('profile.teamSize')}</p>
-                  <p className="text-base font-bold text-on-surface">1,284</p>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">Wallet Balance</p>
+                  <p className="text-base font-bold text-on-surface">₹ {user?.walletBalance || 0}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">{t('profile.totalEarnings')}</p>
-                  <p className="text-base font-bold text-primary">$45,250.00</p>
+                  <p className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-0.5">Total Earnings</p>
+                  <p className="text-base font-bold text-primary">₹ {user?.totalEarnings || 0}</p>
                 </div>
               </div>
             </div>
@@ -228,28 +506,27 @@ function Profile({
         </div>
       )}
 
-      {/* 2. Main Reorganized Tabbed Interface */}
+      {/* MAIN TABBED INTERFACE */}
       <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
-        
+
         {/* Navigation Tabs */}
         <div className="flex border-b border-outline-variant overflow-x-auto hide-scrollbar bg-surface-container-lowest">
           {[
-            { id: 'personal', label: t('profile.personalTab'), icon: 'person' },
-            { id: 'bank', label: t('profile.bankTab'), icon: 'account_balance' },
-            { id: 'plan', label: t('profile.planTab') || 'Plan & Referral', icon: 'verified' },
-            { id: 'kyc', label: t('profile.kycTab'), icon: 'badge' }
+            { id: 'personal', label: t('profile.personalTab') || 'Personal Info', icon: 'person' },
+            { id: 'bank', label: t('profile.bankTab') || 'Bank Details', icon: 'account_balance' },
+            { id: 'documents', label: t('profile.documentsTab') || 'Documents', icon: 'upload_file' },
+            { id: 'plan_payment', label: t('profile.planPaymentTab') || 'Plan & Payment', icon: 'payments' }
           ].map(tab => {
             const isActive = activeTab === tab.id;
             return (
-              <button 
+              <button
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all border-b-2 flex items-center gap-2 cursor-pointer ${
-                  isActive 
-                    ? 'text-primary border-primary bg-surface-container-low' 
-                    : 'text-on-surface-variant border-transparent hover:text-on-surface hover:bg-surface-container-lowest'
-                }`}
+                className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all border-b-2 flex items-center gap-2 cursor-pointer ${isActive
+                  ? 'text-primary border-primary bg-surface-container-low'
+                  : 'text-on-surface-variant border-transparent hover:text-on-surface hover:bg-surface-container-lowest'
+                  }`}
               >
                 <span className={`material-symbols-outlined text-[18px] ${isActive ? 'filled-icon' : ''}`}>
                   {tab.icon}
@@ -262,70 +539,67 @@ function Profile({
 
         {/* Tab Content Body */}
         <div className="p-6 md:p-8">
-          
+
           {/* TAB 1: PERSONAL INFO */}
           {activeTab === 'personal' && (
             <form onSubmit={hasCompletedProfile ? handleProfileSubmit : handleFinalCompletion} className="space-y-8 max-w-[840px]">
-              
-              {/* Personal Information Fields */}
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-outline-variant/60">
                   <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary text-[20px]">person_outline</span>
                     <span>Personal Details</span>
                   </h3>
-                  <span className="text-xs text-on-surface-variant italic">Registration Form Profile</span>
+                  <span className="text-xs text-on-surface-variant italic">Registration Profile</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  
+
                   {/* Full Name */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
                       <span>{t('profile.fullName')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="fullName"
                       required
                       value={profileForm.fullName || ''}
                       onChange={handleProfileChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow font-medium" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-medium"
+                      type="text"
                     />
                   </div>
 
                   {/* Father's / Husband's Name */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.fatherOrHusbandName') || "Father's / Husband's Name"}</span>
+                      <span>{t('profile.fatherOrHusbandName')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="fatherOrHusbandName"
                       required
                       value={profileForm.fatherOrHusbandName || ''}
                       onChange={handleProfileChange}
-                      placeholder="e.g. Robert Wright"
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="text"
                     />
                   </div>
 
                   {/* Mother's Name */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.motherName') || "Mother's Name"}</span>
+                      <span>{t('profile.motherName')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="motherName"
                       required
                       value={profileForm.motherName || ''}
                       onChange={handleProfileChange}
-                      placeholder="e.g. Eleanor Wright"
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="text"
                     />
                   </div>
 
@@ -335,13 +609,13 @@ function Profile({
                       <span>{t('profile.email')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="email"
                       required
                       value={profileForm.email || ''}
                       onChange={handleProfileChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="email" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="email"
                     />
                   </div>
 
@@ -351,13 +625,13 @@ function Profile({
                       <span>{t('profile.phone')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="phone"
                       required
                       value={profileForm.phone || ''}
                       onChange={handleProfileChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="tel" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="tel"
                     />
                   </div>
 
@@ -367,13 +641,13 @@ function Profile({
                       <span>{t('profile.dob')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="dob"
                       required
                       value={profileForm.dob || ''}
                       onChange={handleProfileChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="date" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="date"
                     />
                   </div>
 
@@ -383,7 +657,7 @@ function Profile({
                       <span>{t('profile.gender')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <select 
+                    <select
                       name="gender"
                       required
                       value={profileForm.gender || 'Male'}
@@ -399,45 +673,34 @@ function Profile({
                   {/* Nationality */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.nationality') || 'Nationality'}</span>
+                      <span>{t('profile.nationality')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="nationality"
                       required
                       value={profileForm.nationality || 'Indian'}
                       onChange={handleProfileChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="text"
                     />
                   </div>
 
-                  {/* Aadhaar Card Number (Secure / Masked) */}
+                  {/* Aadhaar Card Number */}
                   <div className="space-y-1 md:col-span-2">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.aadhaarNumber') || 'Aadhaar Card Number'}</span>
+                      <span>{t('profile.aadhaarNumber')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <div className="relative">
-                      <input 
-                        name="aadhaarNumber"
-                        required
-                        value={showAadhaar ? (profileForm.aadhaarNumber || '') : getMaskedAadhaar(profileForm.aadhaarNumber)}
-                        onChange={handleProfileChange}
-                        className="w-full h-11 pl-4 pr-12 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono tracking-wider transition-shadow" 
-                        type="text" 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAadhaar(!showAadhaar)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1"
-                        title={showAadhaar ? "Mask Aadhaar Number" : "Reveal Aadhaar Number"}
-                      >
-                        <span className="material-symbols-outlined text-[20px]">
-                          {showAadhaar ? 'visibility_off' : 'visibility'}
-                        </span>
-                      </button>
-                    </div>
+                    <input
+                      name="aadhaarNumber"
+                      required
+                      value={profileForm.aadhaarNumber || ''}
+                      onChange={handleProfileChange}
+                      placeholder="e.g. 1234 5678 9012"
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono tracking-wider transition-shadow"
+                      type="text"
+                    />
                   </div>
 
                 </div>
@@ -449,20 +712,20 @@ function Profile({
                   <span className="material-symbols-outlined text-primary text-[20px]">location_on</span>
                   <span>Residential Address</span>
                 </h3>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
                       <span>{t('profile.street')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="street"
                       required
                       value={profileForm.street || ''}
                       onChange={handleProfileChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="text"
                     />
                   </div>
 
@@ -472,13 +735,13 @@ function Profile({
                         <span>{t('profile.city')}</span>
                         <span className="text-red-600 font-bold">* Required</span>
                       </label>
-                      <input 
+                      <input
                         name="city"
                         required
                         value={profileForm.city || ''}
                         onChange={handleProfileChange}
-                        className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                        type="text" 
+                        className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                        type="text"
                       />
                     </div>
                     <div className="space-y-1">
@@ -486,13 +749,13 @@ function Profile({
                         <span>{t('profile.state')}</span>
                         <span className="text-red-600 font-bold">* Required</span>
                       </label>
-                      <input 
+                      <input
                         name="state"
                         required
                         value={profileForm.state || ''}
                         onChange={handleProfileChange}
-                        className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                        type="text" 
+                        className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                        type="text"
                       />
                     </div>
                     <div className="space-y-1">
@@ -500,13 +763,13 @@ function Profile({
                         <span>{t('profile.zip')}</span>
                         <span className="text-red-600 font-bold">* Required</span>
                       </label>
-                      <input 
+                      <input
                         name="zip"
                         required
                         value={profileForm.zip || ''}
                         onChange={handleProfileChange}
-                        className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                        type="text" 
+                        className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                        type="text"
                       />
                     </div>
                   </div>
@@ -516,7 +779,7 @@ function Profile({
                       <span>{t('profile.country')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <select 
+                    <select
                       name="country"
                       required
                       value={profileForm.country || 'India'}
@@ -537,40 +800,38 @@ function Profile({
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-[20px]">family_restroom</span>
                   <h3 className="text-base font-bold text-on-surface">
-                    {t('profile.nomineeHeader') || 'Nominee Details'}
+                    {t('profile.nomineeHeader')}
                   </h3>
                 </div>
 
                 <div className="p-4 bg-bone/60 border border-outline-variant/70 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.nomineeName') || 'Nominee Name'}</span>
+                      <span>{t('profile.nomineeName')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="nomineeName"
                       required
                       value={profileForm.nomineeName || ''}
                       onChange={handleProfileChange}
-                      placeholder="e.g. Catherine Wright"
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="text"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.nomineeRelation') || 'Relationship with Nominee'}</span>
+                      <span>{t('profile.nomineeRelation')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="nomineeRelation"
                       required
                       value={profileForm.nomineeRelation || ''}
                       onChange={handleProfileChange}
-                      placeholder="e.g. Spouse / Son / Daughter"
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm"
+                      type="text"
                     />
                   </div>
                 </div>
@@ -578,8 +839,8 @@ function Profile({
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-outline-variant/60">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setActiveTab('bank')}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-bone border border-sand text-espresso text-sm font-semibold hover:bg-ivory transition-colors cursor-pointer flex items-center justify-center gap-2"
                 >
@@ -588,22 +849,21 @@ function Profile({
                 </button>
 
                 {!hasCompletedProfile && (
-                  <button 
+                  <button
                     type="button"
                     onClick={handleFinalCompletion}
-                    disabled={!isProfileCompleteValid}
-                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${
-                      isProfileCompleteValid
-                        ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
-                        : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
-                    }`}
+                    disabled={!isProfileCompleteValid || submittingProfile}
+                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${isProfileCompleteValid
+                      ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
+                      : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
+                      }`}
                   >
-                    <span>{t('profile.completeProfileBtn') || 'Complete Profile & Unlock Dashboard →'}</span>
+                    <span>{submittingProfile ? 'Completing Profile...' : 'Complete Profile & Unlock Dashboard →'}</span>
                   </button>
                 )}
 
                 {hasCompletedProfile && (
-                  <button 
+                  <button
                     type="submit"
                     className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-primary text-on-primary text-sm font-bold hover:bg-[#641722] transition-all shadow-md cursor-pointer"
                   >
@@ -618,32 +878,31 @@ function Profile({
           {/* TAB 2: BANK DETAILS */}
           {activeTab === 'bank' && (
             <form onSubmit={hasCompletedProfile ? handleBankSubmit : handleFinalCompletion} className="space-y-8 max-w-[840px]">
-              
-              {/* Bank Account Details */}
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-2 border-b border-outline-variant/60">
                   <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary text-[20px]">account_balance</span>
-                    <span>{t('profile.bankHeader') || 'Bank Account Details'}</span>
+                    <span>{t('profile.bankHeader')}</span>
                   </h3>
-                  <span className="text-xs text-on-surface-variant italic">Official Payout Settlement</span>
+                  <span className="text-xs text-on-surface-variant italic">Official Settlement Account</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  
+
                   {/* Bank Name */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
                       <span>{t('profile.bankName')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="bankName"
                       required
                       value={bankForm.bankName || ''}
                       onChange={handleBankChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow font-medium" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow font-medium"
+                      type="text"
                     />
                   </div>
 
@@ -653,42 +912,31 @@ function Profile({
                       <span>{t('profile.holderName')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="holderName"
                       required
                       value={bankForm.holderName || ''}
                       onChange={handleBankChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow font-medium" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow font-medium"
+                      type="text"
                     />
                   </div>
 
-                  {/* Bank Account Number (Masked / Secure) */}
+                  {/* Bank Account Number */}
                   <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
                       <span>{t('profile.accountNumber')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <div className="relative">
-                      <input 
-                        name="accountNumber"
-                        required
-                        value={showAccountNum ? (bankForm.accountNumber || '') : getMaskedAccount(bankForm.accountNumber)}
-                        onChange={handleBankChange}
-                        className="w-full h-11 pl-4 pr-12 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono tracking-wider transition-shadow" 
-                        type="text" 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowAccountNum(!showAccountNum)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer p-1"
-                        title={showAccountNum ? "Mask Account Number" : "Reveal Account Number"}
-                      >
-                        <span className="material-symbols-outlined text-[20px]">
-                          {showAccountNum ? 'visibility_off' : 'visibility'}
-                        </span>
-                      </button>
-                    </div>
+                    <input
+                      name="accountNumber"
+                      required
+                      value={bankForm.accountNumber || ''}
+                      onChange={handleBankChange}
+                      placeholder="e.g. 98765432101234"
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono tracking-wider transition-shadow"
+                      type="text"
+                    />
                   </div>
 
                   {/* IFSC / SWIFT Code */}
@@ -697,76 +945,27 @@ function Profile({
                       <span>{t('profile.ifscCode')}</span>
                       <span className="text-red-600 font-bold">* Required</span>
                     </label>
-                    <input 
+                    <input
                       name="ifscCode"
                       required
                       value={bankForm.ifscCode || ''}
                       onChange={handleBankChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono transition-shadow uppercase" 
-                      type="text" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono transition-shadow uppercase"
+                      type="text"
                     />
                   </div>
 
-                  {/* Account Type */}
+                  {/* Branch Name */}
                   <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.accountType')}</span>
-                      <span className="text-red-600 font-bold">* Required</span>
-                    </label>
-                    <select 
-                      name="accountType"
-                      required
-                      value={bankForm.accountType || 'Savings Account'}
-                      onChange={handleBankChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow cursor-pointer"
-                    >
-                      <option>Savings Account</option>
-                      <option>Current Account</option>
-                      <option>Salary Account</option>
-                    </select>
-                  </div>
-
-                </div>
-              </div>
-
-              {/* Digital Payment & Contact Details */}
-              <div className="space-y-4 pt-4 border-t border-outline-variant/50">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[20px]">qr_code_2</span>
-                  <h3 className="text-base font-bold text-on-surface">
-                    {t('profile.digitalPaymentHeader') || 'Digital Payment & Contact Details'}
-                  </h3>
-                </div>
-
-                <div className="p-4 bg-bone/60 border border-outline-variant/70 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-5">
-                  
-                  {/* Paytm / PhonePe Details */}
-                  <div className="space-y-1">
                     <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.paytmPhonePe') || 'Paytm / PhonePe Detail'}
+                      Branch Name / Location
                     </label>
-                    <input 
-                      name="paytmPhonePe"
-                      value={bankForm.paytmPhonePe || ''}
+                    <input
+                      name="branchName"
+                      value={bankForm.branchName || ''}
                       onChange={handleBankChange}
-                      placeholder="e.g. 9876543210@paytm / ybl"
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow font-mono" 
-                      type="text" 
-                    />
-                  </div>
-
-                  {/* Mobile Number */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.paymentMobile') || 'Registered Payment Mobile No.'}
-                    </label>
-                    <input 
-                      name="paymentMobile"
-                      value={bankForm.paymentMobile || ''}
-                      onChange={handleBankChange}
-                      placeholder="e.g. +91 98765 43210"
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow" 
-                      type="tel" 
+                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow font-medium"
+                      type="text"
                     />
                   </div>
 
@@ -775,32 +974,31 @@ function Profile({
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-outline-variant/60">
-                <button 
-                  type="button" 
-                  onClick={() => setActiveTab('plan')}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('documents')}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-bone border border-sand text-espresso text-sm font-semibold hover:bg-ivory transition-colors cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <span>Next: Plan & Referral</span>
+                  <span>Next: Documents Upload</span>
                   <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </button>
 
                 {!hasCompletedProfile && (
-                  <button 
+                  <button
                     type="button"
                     onClick={handleFinalCompletion}
-                    disabled={!isProfileCompleteValid}
-                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${
-                      isProfileCompleteValid
-                        ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
-                        : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
-                    }`}
+                    disabled={!isProfileCompleteValid || submittingProfile}
+                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${isProfileCompleteValid
+                      ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
+                      : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
+                      }`}
                   >
-                    <span>{t('profile.completeProfileBtn') || 'Complete Profile & Unlock Dashboard →'}</span>
+                    <span>{submittingProfile ? 'Completing Profile...' : 'Complete Profile & Unlock Dashboard →'}</span>
                   </button>
                 )}
 
                 {hasCompletedProfile && (
-                  <button 
+                  <button
                     type="submit"
                     className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-primary text-on-primary text-sm font-bold hover:bg-[#641722] transition-all shadow-md cursor-pointer"
                   >
@@ -812,354 +1010,303 @@ function Profile({
             </form>
           )}
 
-          {/* TAB 3: PLAN & REFERRAL */}
-          {activeTab === 'plan' && (
-            <form onSubmit={hasCompletedProfile ? handlePlanSubmit : handleFinalCompletion} className="space-y-8 max-w-[840px]">
-              
-              {/* Registered Plan & Scheme Details Banner */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-outline-variant/60">
-                  <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[20px]">workspace_premium</span>
-                    <span>{t('profile.planHeader') || 'Registered Investment Plan'}</span>
-                  </h3>
-                  <span className="text-xs text-on-surface-variant italic">Official Registration Record</span>
-                </div>
+          {/* TAB 3: DOCUMENTS UPLOAD (REAL SUPABASE STORAGE) */}
+          {activeTab === 'documents' && (
+            <div className="space-y-8 max-w-[840px]">
 
-                {/* Plan Summary Highlight Box */}
-                <div className="p-5 bg-gradient-to-r from-bone via-cream to-bone border border-gold/40 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold block mb-1">
-                      ACTIVE CONTRACT PLAN
-                    </span>
-                    <h4 className="text-xl font-extrabold text-primary">
-                      {planForm.planName || 'Daily Return Plan'}
-                    </h4>
-                  </div>
-                  <div className="sm:text-right bg-surface px-5 py-2.5 rounded-lg border border-sand">
-                    <span className="text-xs text-warm-gray font-semibold block">SCHEME AMOUNT</span>
-                    <span className="text-2xl font-black text-forest">
-                      ₹ {planForm.schemeAmount || '1,00,000'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Editable Plan Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.planName') || 'Plan Name'}</span>
-                      <span className="text-red-600 font-bold">* Required</span>
-                    </label>
-                    <input 
-                      name="planName"
-                      required
-                      value={planForm.planName || ''}
-                      onChange={handlePlanChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-semibold" 
-                      type="text" 
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between">
-                      <span>{t('profile.schemeAmount') || 'Scheme Plan (in ₹)'}</span>
-                      <span className="text-red-600 font-bold">* Required</span>
-                    </label>
-                    <input 
-                      name="schemeAmount"
-                      required
-                      value={planForm.schemeAmount || ''}
-                      onChange={handlePlanChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-semibold" 
-                      type="text" 
-                    />
-                  </div>
+              <div className="p-5 bg-tertiary/10 border border-tertiary/20 rounded-xl flex items-center gap-4">
+                <span className="material-symbols-outlined text-tertiary text-[36px] filled-icon">cloud_upload</span>
+                <div>
+                  <h4 className="text-base font-bold text-on-surface">Document Verification Attachments</h4>
+                  <p className="text-sm text-on-surface-variant">Please upload clear copies of your Aadhaar Card and Bank Passbook/Cheque photo to fulfill profile completion requirements.</p>
                 </div>
               </div>
 
-              {/* Reference & Referral Information */}
-              <div className="space-y-4 pt-4 border-t border-outline-variant/50">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[20px]">share</span>
-                    <span>{t('profile.referenceHeader') || 'Reference & Referral Details'}</span>
-                  </h3>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  
-                  {/* Reference ID Detail */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.referenceId') || 'Reference ID Detail'}
-                    </label>
-                    <input 
-                      name="referenceId"
-                      value={planForm.referenceId || ''}
-                      onChange={handlePlanChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono" 
-                      type="text" 
-                    />
-                  </div>
-
-                  {/* Reference Name */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.referenceName') || 'Reference Name'}
-                    </label>
-                    <input 
-                      name="referenceName"
-                      value={planForm.referenceName || ''}
-                      onChange={handlePlanChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-medium" 
-                      type="text" 
-                    />
-                  </div>
-
-                  {/* Referral Code (with copy button) */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.referralCode') || 'Referral Code'}
-                    </label>
-                    <div className="flex">
-                      <input 
-                        name="referralCode"
-                        value={planForm.referralCode || ''}
-                        onChange={handlePlanChange}
-                        className="flex-1 h-11 px-4 rounded-l-lg border border-r-0 border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono font-bold uppercase" 
-                        type="text" 
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText(planForm.referralCode || '');
-                          triggerToast('Referral Code copied to clipboard!');
-                        }}
-                        className="px-3 rounded-r-lg bg-primary text-on-primary hover:bg-[#641722] text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                        title="Copy Referral Code"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">content_copy</span>
-                      </button>
+                {/* 1. AADHAAR CARD UPLOAD */}
+                <div className="bg-surface border border-outline-variant rounded-xl p-5 space-y-4">
+                  <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary text-[20px]">badge</span>
+                      <h4 className="font-bold text-sm text-on-surface">Aadhaar Card Document</h4>
                     </div>
+                    <span className="text-xs font-bold text-red-600">* Required</span>
                   </div>
 
+                  {(documentsForm.aadhaarUrl || user?.aadhaarDocumentUrl) ? (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
+                        <span className="material-symbols-outlined text-[18px] text-emerald-600">check_circle</span>
+                        <span>Aadhaar Document Uploaded</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-700 font-mono truncate">
+                        {documentsForm.aadhaarUrl || user?.aadhaarDocumentUrl}
+                      </p>
+                      <label className="inline-block mt-2 px-3 py-1.5 bg-emerald-700 text-white rounded text-xs font-semibold hover:bg-emerald-800 transition cursor-pointer">
+                        <span>Replace Document</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => handleFileUpload(e, 'aadhaar')}
+                          className="hidden"
+                          disabled={uploadingAadhaar}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <label className={`border-2 border-dashed border-outline-variant rounded-xl p-6 text-center flex flex-col items-center justify-center transition cursor-pointer hover:bg-surface-container-low ${uploadingAadhaar ? 'opacity-50 cursor-wait' : ''}`}>
+                        <span className="material-symbols-outlined text-[36px] text-on-surface-variant mb-1">upload_file</span>
+                        <span className="font-bold text-xs text-primary">Click to Upload Aadhaar Card</span>
+                        <span className="text-[11px] text-on-surface-variant mt-1">PDF, PNG, JPG (Max 10MB)</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => handleFileUpload(e, 'aadhaar')}
+                          className="hidden"
+                          disabled={uploadingAadhaar}
+                        />
+                      </label>
+                      {uploadingAadhaar && (
+                        <p className="text-xs text-primary font-semibold text-center animate-pulse">Uploading Aadhaar to Storage...</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {/* Income & Professional Details */}
-              <div className="space-y-4 pt-4 border-t border-outline-variant/50">
-                <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[20px]">work</span>
-                  <span>{t('profile.incomeHeader') || 'Income & Professional Details'}</span>
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.sourceOfIncome') || 'Source of Income'}
-                    </label>
-                    <input 
-                      name="sourceOfIncome"
-                      value={planForm.sourceOfIncome || ''}
-                      onChange={handlePlanChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm" 
-                      type="text" 
-                    />
+                {/* 2. PASSBOOK PHOTO UPLOAD */}
+                <div className="bg-surface border border-outline-variant rounded-xl p-5 space-y-4">
+                  <div className="flex items-center justify-between border-b border-outline-variant/60 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary text-[20px]">account_balance_wallet</span>
+                      <h4 className="font-bold text-sm text-on-surface">Bank Passbook / Cheque Photo</h4>
+                    </div>
+                    <span className="text-xs font-bold text-red-600">* Required</span>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.businessDetail') || 'Business Detail'}
-                    </label>
-                    <input 
-                      name="businessDetail"
-                      value={planForm.businessDetail || ''}
-                      onChange={handlePlanChange}
-                      placeholder={planForm.businessDetail ? '' : 'Not provided'}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm" 
-                      type="text" 
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.serviceDetail') || 'Service Detail'}
-                    </label>
-                    <input 
-                      name="serviceDetail"
-                      value={planForm.serviceDetail || ''}
-                      onChange={handlePlanChange}
-                      placeholder={planForm.serviceDetail ? '' : 'Not provided'}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm" 
-                      type="text" 
-                    />
-                  </div>
+                  {(documentsForm.passbookUrl || user?.passbookDocumentUrl) ? (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 space-y-2">
+                      <div className="flex items-center gap-2 text-emerald-800 font-bold text-xs">
+                        <span className="material-symbols-outlined text-[18px] text-emerald-600">check_circle</span>
+                        <span>Passbook Photo Uploaded</span>
+                      </div>
+                      <p className="text-[11px] text-emerald-700 font-mono truncate">
+                        {documentsForm.passbookUrl || user?.passbookDocumentUrl}
+                      </p>
+                      <label className="inline-block mt-2 px-3 py-1.5 bg-emerald-700 text-white rounded text-xs font-semibold hover:bg-emerald-800 transition cursor-pointer">
+                        <span>Replace Passbook Photo</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => handleFileUpload(e, 'passbook')}
+                          className="hidden"
+                          disabled={uploadingPassbook}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <label className={`border-2 border-dashed border-outline-variant rounded-xl p-6 text-center flex flex-col items-center justify-center transition cursor-pointer hover:bg-surface-container-low ${uploadingPassbook ? 'opacity-50 cursor-wait' : ''}`}>
+                        <span className="material-symbols-outlined text-[36px] text-on-surface-variant mb-1">receipt_long</span>
+                        <span className="font-bold text-xs text-primary">Click to Upload Passbook Photo</span>
+                        <span className="text-[11px] text-on-surface-variant mt-1">PDF, PNG, JPG (Max 10MB)</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={(e) => handleFileUpload(e, 'passbook')}
+                          className="hidden"
+                          disabled={uploadingPassbook}
+                        />
+                      </label>
+                      {uploadingPassbook && (
+                        <p className="text-xs text-primary font-semibold text-center animate-pulse">Uploading Passbook to Storage...</p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {/* Registration Details */}
-              <div className="space-y-4 pt-4 border-t border-outline-variant/50">
-                <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[20px]">edit_calendar</span>
-                  <span>{t('profile.registrationHeader') || 'Registration Details'}</span>
-                </h3>
-
-                <div className="p-4 bg-bone/60 border border-outline-variant/70 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.regDate') || 'Registration Date'}
-                    </label>
-                    <input 
-                      name="regDate"
-                      value={planForm.regDate || ''}
-                      onChange={handlePlanChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm" 
-                      type="date" 
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-                      {t('profile.regPlace') || 'Registration Place'}
-                    </label>
-                    <input 
-                      name="regPlace"
-                      value={planForm.regPlace || ''}
-                      onChange={handlePlanChange}
-                      className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm" 
-                      type="text" 
-                    />
-                  </div>
-                </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-outline-variant/60">
-                <button 
-                  type="button" 
-                  onClick={() => setActiveTab('kyc')}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('plan_payment')}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-bone border border-sand text-espresso text-sm font-semibold hover:bg-ivory transition-colors cursor-pointer flex items-center justify-center gap-2"
                 >
-                  <span>Next: KYC Verification</span>
+                  <span>Next: Plan & Payment</span>
                   <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
                 </button>
 
                 {!hasCompletedProfile && (
-                  <button 
+                  <button
                     type="button"
                     onClick={handleFinalCompletion}
-                    disabled={!isProfileCompleteValid}
-                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${
-                      isProfileCompleteValid
-                        ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
-                        : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
-                    }`}
+                    disabled={!isProfileCompleteValid || submittingProfile}
+                    className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${isProfileCompleteValid
+                      ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
+                      : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
+                      }`}
                   >
-                    <span>{t('profile.completeProfileBtn') || 'Complete Profile & Unlock Dashboard →'}</span>
-                  </button>
-                )}
-
-                {hasCompletedProfile && (
-                  <button 
-                    type="submit"
-                    className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-primary text-on-primary text-sm font-bold hover:bg-[#641722] transition-all shadow-md cursor-pointer"
-                  >
-                    Save Plan & Referral Info
+                    <span>{submittingProfile ? 'Completing Profile...' : 'Complete Profile & Unlock Dashboard →'}</span>
                   </button>
                 )}
               </div>
 
-            </form>
+            </div>
           )}
 
-          {/* TAB 4: KYC VERIFICATION */}
-          {activeTab === 'kyc' && (
-            <form onSubmit={hasCompletedProfile ? handleKycSubmit : handleFinalCompletion} className="space-y-8 max-w-[840px]">
-              
-              <div className="p-5 bg-tertiary/10 border border-tertiary/20 rounded-xl flex items-center gap-4">
-                <span className="material-symbols-outlined text-tertiary text-[36px] filled-icon">verified_user</span>
-                <div>
-                  <h4 className="text-base font-bold text-on-surface">KYC Status: {kycForm.status}</h4>
-                  <p className="text-sm text-on-surface-variant">Your KYC identity documents have been verified and approved. Your withdrawal permissions are active.</p>
+          {/* TAB 4: PLAN SELECTION & PAYMENT */}
+          {activeTab === 'plan_payment' && (
+            <div className="space-y-8 max-w-[840px]">
+
+              {/* 1. PLAN SELECTION CARDS */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-outline-variant/60">
+                  <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[20px]">workspace_premium</span>
+                    <span>Select An Investment Plan</span>
+                  </h3>
+                  <span className="text-xs text-on-surface-variant italic">Choose 1 of 6 official schemes</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {INVESTMENT_PLANS.map((plan) => {
+                    const isSelected = planForm.planName === plan.title;
+                    return (
+                      <div
+                        key={plan.id}
+                        onClick={() => handleSelectPlan(plan)}
+                        className={`p-5 rounded-xl border-2 transition-all cursor-pointer space-y-3 relative overflow-hidden ${isSelected
+                          ? 'border-primary bg-primary/5 shadow-md ring-1 ring-primary'
+                          : 'border-outline-variant bg-surface hover:border-primary/50'
+                          }`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <span className="text-[9.5px] font-bold tracking-wider uppercase text-gold bg-black/40 px-2 py-0.5 rounded">
+                              {plan.tag}
+                            </span>
+                            <h4 className="text-base font-extrabold text-on-surface mt-1.5">{plan.title}</h4>
+                          </div>
+                          <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full whitespace-nowrap">
+                            {plan.badge}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-on-surface-variant leading-relaxed">{plan.desc}</p>
+
+                        <div className="flex items-center justify-between pt-2 border-t border-outline-variant/50">
+                          <span className="text-xs text-warm-gray font-semibold">Investment Amount:</span>
+                          <span className="text-lg font-black text-forest">₹ {plan.formattedAmount}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t('profile.docType')}</label>
-                  <select 
-                    name="docType"
-                    value={kycForm.docType || 'Passport'}
-                    onChange={handleKycChange}
-                    className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm transition-shadow cursor-pointer"
-                  >
-                    <option>Aadhaar Card</option>
-                    <option>Passport</option>
-                    <option>PAN Card</option>
-                    <option>Driver's License</option>
-                  </select>
+              {/* 2. PAYMENT & QR CODE SECTION */}
+              <div className="space-y-4 pt-4 border-t border-outline-variant/60">
+                <div className="flex items-center justify-between pb-2 border-b border-outline-variant/60">
+                  <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary text-[20px]">qr_code_2</span>
+                    <span>Payment & Transaction Verification</span>
+                  </h3>
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200">
+                    Status: {planForm.paymentStatus || user?.paymentStatus || 'Unpaid'}
+                  </span>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">{t('profile.docNumber')}</label>
-                  <input 
-                    name="docNumber"
-                    value={kycForm.docNumber || ''}
-                    onChange={handleKycChange}
-                    className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono" 
-                    type="text" 
-                  />
-                </div>
-              </div>
 
-              {/* Document Uploader */}
-              <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Uploaded Document Attachment</label>
-                <div 
-                  onClick={() => triggerToast("Upload document dialog coming soon!")}
-                  className="border-2 border-dashed border-outline-variant rounded-xl p-8 text-center hover:bg-surface-container-low transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[48px] text-on-surface-variant mb-2">cloud_upload</span>
-                  <p className="font-bold text-sm text-espresso mb-1">aadhaar_alexander_wright.pdf</p>
-                  <p className="text-xs text-on-surface-variant">PDF, PNG or JPG up to 10MB (Click to browse and replace file)</p>
+                <div className="bg-cream/60 border border-sand rounded-xl p-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+
+                  {/* QR Code Container */}
+                  <div className="flex flex-col items-center justify-center p-5 bg-white border border-sand rounded-xl text-center space-y-3 shadow-sm">
+                    <div className="w-48 h-48 bg-cream border-2 border-primary/20 rounded-xl p-3 flex items-center justify-center relative">
+                      <svg className="w-full h-full text-espresso" viewBox="0 0 100 100" fill="currentColor">
+                        <rect x="0" y="0" width="100" height="100" fill="#FFF8F0" />
+                        <rect x="10" y="10" width="25" height="25" fill="#861F2B" />
+                        <rect x="15" y="15" width="15" height="15" fill="#FFF8F0" />
+                        <rect x="18" y="18" width="9" height="9" fill="#861F2B" />
+                        <rect x="65" y="10" width="25" height="25" fill="#861F2B" />
+                        <rect x="70" y="15" width="15" height="15" fill="#FFF8F0" />
+                        <rect x="73" y="18" width="9" height="9" fill="#861F2B" />
+                        <rect x="10" y="65" width="25" height="25" fill="#861F2B" />
+                        <rect x="15" y="70" width="15" height="15" fill="#FFF8F0" />
+                        <rect x="18" y="73" width="9" height="9" fill="#861F2B" />
+                        <rect x="40" y="10" width="10" height="10" fill="#861F2B" />
+                        <rect x="40" y="30" width="20" height="10" fill="#861F2B" />
+                        <rect x="10" y="40" width="15" height="10" fill="#861F2B" />
+                        <rect x="65" y="40" width="25" height="10" fill="#861F2B" />
+                        <rect x="40" y="55" width="15" height="15" fill="#861F2B" />
+                        <rect x="60" y="65" width="15" height="10" fill="#861F2B" />
+                        <rect x="80" y="80" width="10" height="10" fill="#861F2B" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">Official Company Payment QR</span>
+                      <span className="text-[10px] text-warm-gray">Scan with PhonePe, Paytm, GPay or BHIM UPI</span>
+                    </div>
+                  </div>
+
+                  {/* Payment Instructions & Submission Form */}
+                  <form onSubmit={handlePaymentSubmit} className="space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-xs text-warm-gray font-semibold block">SELECTED PLAN</span>
+                      <p className="text-base font-extrabold text-primary">{planForm.planName || 'Please select a plan above'}</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-xs text-warm-gray font-semibold block">AMOUNT PAYABLE</span>
+                      <p className="text-2xl font-black text-forest">₹ {planForm.schemeAmount ? Number(planForm.schemeAmount).toLocaleString('en-IN') : '0'}</p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold uppercase tracking-wider text-on-surface block">
+                        Payment Reference / Transaction ID *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={planForm.paymentReference || ''}
+                        onChange={(e) => handlePlanChange({ target: { name: 'paymentReference', value: e.target.value } })}
+                        placeholder="e.g. UPI/123456789012"
+                        className="w-full h-11 px-4 rounded-lg border border-outline-variant bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-on-surface text-sm font-mono font-semibold"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={submittingPayment || !planForm.planName}
+                      className="w-full py-3 bg-primary hover:bg-[#641722] text-white font-bold text-sm rounded-xl transition shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">verified</span>
+                      <span>{submittingPayment ? 'Submitting Details...' : 'Submit Payment Details'}</span>
+                    </button>
+                  </form>
+
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-outline-variant/60">
-                {!hasCompletedProfile ? (
-                  <button 
+                {!hasCompletedProfile && (
+                  <button
                     type="button"
                     onClick={handleFinalCompletion}
-                    disabled={!isProfileCompleteValid}
-                    className={`w-full px-8 py-3.5 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${
-                      isProfileCompleteValid
-                        ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
-                        : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
-                    }`}
+                    disabled={!isProfileCompleteValid || submittingProfile}
+                    className={`w-full px-8 py-3.5 rounded-xl text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 ${isProfileCompleteValid
+                      ? 'bg-primary text-on-primary hover:bg-[#641722] cursor-pointer shadow-lg active:scale-[0.99]'
+                      : 'bg-sand/60 text-warm-gray cursor-not-allowed opacity-70 shadow-none'
+                      }`}
                   >
-                    <span>{t('profile.completeProfileBtn') || 'Complete Profile & Unlock Dashboard →'}</span>
+                    <span>{submittingProfile ? 'Completing Profile...' : 'Complete Profile & Unlock Dashboard →'}</span>
                   </button>
-                ) : (
-                  <div className="flex justify-end gap-3 w-full">
-                    <button 
-                      type="button" 
-                      onClick={() => triggerToast("Changes reset", "info")}
-                      className="px-6 py-2.5 rounded-lg bg-surface border border-outline-variant text-on-surface text-sm font-semibold hover:bg-surface-container-lowest transition-colors shadow-sm cursor-pointer"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit"
-                      className="px-6 py-2.5 rounded-lg bg-primary text-on-primary text-sm font-bold hover:bg-[#641722] transition-all shadow-md cursor-pointer"
-                    >
-                      Re-submit KYC
-                    </button>
-                  </div>
                 )}
               </div>
 
-            </form>
+            </div>
           )}
 
         </div>

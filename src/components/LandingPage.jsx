@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import SplitText from './SplitText';
 
 function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDarkMode }) {
   const { t, locale, switchLanguage } = useLanguage();
   const [selectedPlanId, setSelectedPlanId] = useState(null);
+
+  const handleAnimationComplete = () => {
+    console.log('All letters have animated!');
+  };
 
   const planMetaMap = {
     '01': {
@@ -124,7 +129,7 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
       <section id="about" className="pt-[96px] pb-14 md:pb-16 px-6 md:px-12 max-w-[1320px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-10">
         
         {/* Left Column: Hero Editorial Typography */}
-        <div className="w-full lg:w-[48%] flex flex-col justify-center items-start space-y-4 text-left shrink-0">
+        <div className="w-full lg:w-[45%] flex flex-col justify-center items-start space-y-4 text-left shrink-0">
           
           {/* Small Eyebrow */}
           <div className="space-y-0.5">
@@ -133,10 +138,103 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
           </div>
 
           {/* Main Headline */}
-          <h1 className="text-[36px] sm:text-[44px] lg:text-[50px] leading-[1.12] font-bold tracking-tight text-[#1D1B19]">
-            {t('landing.startSmall')} <br />
-            <span className="text-[#861F2B]">{t('landing.investSmart')}</span> <br />
-            {t('landing.buildFuture').replace(t('landing.futureWord'), '')}<span className="text-[#B9933F]">{t('landing.futureWord')}</span>
+          <h1 key={locale} className="text-[36px] sm:text-[44px] lg:text-[50px] leading-[1.12] font-bold tracking-tight text-[#1D1B19]">
+            <span className="block">
+              <SplitText
+                text={t('landing.startSmall')}
+                splitType={locale === 'hi' ? 'words' : 'chars'}
+                delay={50}
+                duration={0.6}
+                ease="power3.out"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign="left"
+                tag="span"
+                onLetterAnimationComplete={handleAnimationComplete}
+              />
+            </span>
+            <span className="block text-[#861F2B]">
+              <SplitText
+                text={t('landing.investSmart')}
+                splitType={locale === 'hi' ? 'words' : 'chars'}
+                delay={50}
+                duration={0.6}
+                ease="power3.out"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign="left"
+                tag="span"
+              />
+            </span>
+            <span className="block">
+              {locale === 'en' ? (
+                <>
+                  <SplitText
+                    text="Build Your "
+                    splitType="chars"
+                    delay={50}
+                    duration={0.6}
+                    ease="power3.out"
+                    from={{ opacity: 0, y: 40 }}
+                    to={{ opacity: 1, y: 0 }}
+                    threshold={0.1}
+                    rootMargin="-100px"
+                    textAlign="left"
+                    tag="span"
+                  />
+                  <span className="text-[#B9933F] inline-block">
+                    <SplitText
+                      text="Future."
+                      splitType="chars"
+                      delay={50}
+                      duration={0.6}
+                      ease="power3.out"
+                      from={{ opacity: 0, y: 40 }}
+                      to={{ opacity: 1, y: 0 }}
+                      threshold={0.1}
+                      rootMargin="-100px"
+                      textAlign="left"
+                      tag="span"
+                    />
+                  </span>
+                </>
+              ) : (
+                <>
+                  <SplitText
+                    text="अपना "
+                    splitType="words"
+                    delay={50}
+                    duration={0.6}
+                    ease="power3.out"
+                    from={{ opacity: 0, y: 40 }}
+                    to={{ opacity: 1, y: 0 }}
+                    threshold={0.1}
+                    rootMargin="-100px"
+                    textAlign="left"
+                    tag="span"
+                  />
+                  <span className="text-[#B9933F] inline-block">
+                    <SplitText
+                      text="भविष्य बनाएं।"
+                      splitType="words"
+                      delay={50}
+                      duration={0.6}
+                      ease="power3.out"
+                      from={{ opacity: 0, y: 40 }}
+                      to={{ opacity: 1, y: 0 }}
+                      threshold={0.1}
+                      rootMargin="-100px"
+                      textAlign="left"
+                      tag="span"
+                    />
+                  </span>
+                </>
+              )}
+            </span>
           </h1>
 
           {/* Short 1-2 line description */}
@@ -167,51 +265,38 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
 
         </div>
 
-        {/* Right Column: ONE Beautiful Brochure-Inspired Investment Visual */}
-        <div className="w-full lg:w-[48%] flex items-center justify-center shrink-0">
-          <div className="w-full max-w-[440px] bg-[#FFFDF8] border-2 border-[#B9933F]/60 rounded-2xl p-6 shadow-card relative overflow-hidden bg-gradient-to-b from-[#FFFDF8] to-[#F4F0E8]/50">
+        {/* Right Column: Dominant Rewards Visual + Clean Promotional Text Below */}
+        <div className="w-full lg:w-[54%] flex flex-col items-center justify-center text-center shrink-0 relative">
+          
+          {/* 1. Dominant Rewards / Prices Image */}
+          <div className="w-full max-w-[620px] relative flex items-center justify-center">
+            <img 
+              src="/hero_rewards_visual.png" 
+              alt="Bhagwn Solutions Investment Rewards & Gifts" 
+              className="w-full h-auto object-contain max-h-[440px] sm:max-h-[480px] transition-transform duration-500 hover:scale-[1.01]"
+            />
+          </div>
+
+          {/* 2. Short Promotional Message Directly Below Image */}
+          <div className="w-full max-w-[540px] mt-4 space-y-2 flex flex-col items-center">
             
-            {/* Background Rupee Motif & Circular Pattern */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full border border-[#B9933F]/15 pointer-events-none flex items-center justify-center">
-              <div className="w-[200px] h-[200px] rounded-full border border-[#B9933F]/10"></div>
-              <span className="absolute text-[110px] font-serif text-[#B9933F]/8 font-bold select-none">₹</span>
-            </div>
+            {/* Headline */}
+            <h2 className="text-[24px] sm:text-[30px] lg:text-[34px] font-bold tracking-tight leading-tight text-[#1D1B19]">
+              {t('landing.rewardsHeroHeadline1')} <span className="text-[#861F2B]">{t('landing.rewardsHeroHeadline2')}</span>
+            </h2>
 
-            {/* Header Area inside Card */}
-            <div className="relative z-10 flex items-center justify-between pb-3.5 mb-3 border-b border-[#D8D0C1]/80">
-              <div>
-                <img src="/logo.png" alt="Bhagwn Solutions" className="h-7 w-auto object-contain mb-0.5" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#B9933F]">{t('landing.eyebrowTag')}</span>
-              </div>
-              <div className="text-right">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#861F2B] text-[#FFFDF8] uppercase tracking-wider block">{t('landing.optionsBadge')}</span>
-                <span className="text-[10px] text-[#756F66] mt-0.5 block">{t('landing.chooseApproach')}</span>
-              </div>
-            </div>
+            {/* Supporting Sentence */}
+            <p className="text-[14px] sm:text-[14.5px] leading-[1.5] text-[#756F66] max-w-[460px]">
+              {t('landing.rewardsHeroSub')}
+            </p>
 
-            {/* 6 Compact Plan Rows */}
-            <div className="relative z-10 space-y-2">
-              {['01', '02', '03', '04', '05', '06'].map((id) => {
-                const planKey = `p${parseInt(id, 10)}`;
-                const meta = planMetaMap[id];
-                return (
-                  <div 
-                    key={id}
-                    onClick={() => handleOpenPlanModal(id)}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-[#F4F0E8] border border-[#D8D0C1]/70 hover:border-[#B9933F] cursor-pointer transition-all group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-[11px] font-bold font-mono text-[#B9933F]">{id}</span>
-                      <span className={`material-symbols-outlined text-[16px] ${meta.color}`}>{meta.icon}</span>
-                      <span className="text-[13px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t(`landing.plans.${planKey}.title`)}</span>
-                    </div>
-                    <span className="text-[11px] font-bold text-[#861F2B]">{t(`landing.plans.${planKey}.badge`)}</span>
-                  </div>
-                );
-              })}
+            {/* Small Supporting Line */}
+            <div className="pt-1 text-[12px] font-semibold text-[#B9933F] tracking-wide">
+              {t('landing.exclusiveSub')}
             </div>
 
           </div>
+
         </div>
 
       </section>
@@ -321,83 +406,189 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
         </div>
       </section>
 
-      {/* 6. WHY BHAGWN SOLUTIONS (Compact Horizontal Row, Height ~180px) */}
-      <section id="why-us" className="py-10 px-6 md:px-12 max-w-[1240px] mx-auto">
-        <div className="text-center mb-6">
-          <h2 className="text-[22px] font-bold text-[#1D1B19] tracking-tight">
-            {t('landing.whyBhagwnTitle')}
-          </h2>
+      {/* 6. WHY BHAGWN SOLUTIONS (Redesigned Premium 4-Card Feature Section) */}
+      <section id="why-us" className="py-14 px-6 md:px-12 max-w-[1240px] mx-auto relative">
+        
+        {/* Subtle Background Decorative Arc */}
+        <div className="w-80 h-80 rounded-full border border-[#B9933F]/10 absolute -top-10 -right-10 pointer-events-none hidden lg:block"></div>
+
+        {/* Section Heading with SplitText & Gold Decorative Divider */}
+        <div key={locale} className="text-center mb-10">
+          <SplitText
+            text={t('landing.whyBhagwnTitle')}
+            className="text-2xl sm:text-[28px] font-bold text-center text-[#1D1B19]"
+            delay={100}
+            duration={0.6}
+            ease="power3.out"
+            splitType={locale === 'hi' ? 'words' : 'chars'}
+            from={{ opacity: 0, y: 40 }}
+            to={{ opacity: 1, y: 0 }}
+            threshold={0.1}
+            rootMargin="-100px"
+            textAlign="center"
+            tag="h2"
+            onLetterAnimationComplete={handleAnimationComplete}
+          />
+          {/* Subtle Decorative Gold Divider */}
+          <div className="flex items-center justify-center gap-3 mt-3">
+            <div className="w-12 h-[1px] bg-[#B9933F]/40"></div>
+            <div className="w-2 h-2 rotate-45 border border-[#B9933F] bg-[#B9933F]/20"></div>
+            <div className="w-12 h-[1px] bg-[#B9933F]/40"></div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
+        {/* 4 Feature Cards Grid with Decorative Connecting Line */}
+        <div className="relative">
           
-          <div 
-            onClick={() => triggerToast && triggerToast("Bhagwn Solutions offers 6 flexible investment categories.")}
-            className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-4 cursor-pointer hover:border-[#B9933F] transition-all space-y-1.5"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold font-mono text-[#B9933F]">01</span>
-              <span className="material-symbols-outlined text-[#B9933F] text-[20px]">grid_view</span>
-            </div>
-            <h3 className="text-[14px] font-bold text-[#1D1B19]">{t('landing.multiplePlans')}</h3>
-            <p className="text-[11.5px] text-[#756F66] leading-tight">{t('landing.multiplePlansDesc')}</p>
-          </div>
+          {/* Subtle Horizontal Decorative Dotted Line Behind Cards (Desktop) */}
+          <div className="hidden md:block absolute top-[68px] left-[12%] right-[12%] h-[1px] border-t-2 border-dashed border-[#B9933F]/25 pointer-events-none z-0"></div>
 
-          <div 
-            onClick={() => triggerToast && triggerToast("Contributions start as low as ₹10 or ₹50 daily.")}
-            className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-4 cursor-pointer hover:border-[#B9933F] transition-all space-y-1.5"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold font-mono text-[#B9933F]">02</span>
-              <span className="material-symbols-outlined text-[#861F2B] text-[20px]">tune</span>
-            </div>
-            <h3 className="text-[14px] font-bold text-[#1D1B19]">{t('landing.flexibleOptions')}</h3>
-            <p className="text-[11.5px] text-[#756F66] leading-tight">{t('landing.flexibleOptionsDesc')}</p>
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center relative z-10">
+            
+            {/* Card 01 */}
+            <div 
+              onClick={() => triggerToast && triggerToast("Bhagwn Solutions offers 6 flexible investment categories.")}
+              className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-2xl p-6 shadow-xs hover:shadow-card-hover hover:border-[#B9933F] transition-all duration-300 relative group flex flex-col items-center justify-between min-h-[230px] cursor-pointer"
+            >
+              {/* Number Badge */}
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#B9933F] text-[#FFFDF8] font-bold text-[11px] font-mono flex items-center justify-center border-2 border-[#FFFDF8] shadow-xs z-10">
+                01
+              </div>
 
-          <div 
-            onClick={() => triggerToast && triggerToast("All plans follow transparent maturity timetables.")}
-            className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-4 cursor-pointer hover:border-[#B9933F] transition-all space-y-1.5"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold font-mono text-[#B9933F]">03</span>
-              <span className="material-symbols-outlined text-[#285846] text-[20px]">account_tree</span>
-            </div>
-            <h3 className="text-[14px] font-bold text-[#1D1B19]">{t('landing.structuredInvestment')}</h3>
-            <p className="text-[11.5px] text-[#756F66] leading-tight">{t('landing.structuredInvestmentDesc')}</p>
-          </div>
+              {/* Large Circular Icon Area */}
+              <div className="w-14 h-14 rounded-full bg-[#F4F0E8] border border-[#D8D0C1]/80 flex items-center justify-center text-[#861F2B] mt-2 mb-3 group-hover:scale-105 group-hover:bg-[#FFFDF8] group-hover:border-[#B9933F]/60 transition-all shadow-2xs">
+                <span className="material-symbols-outlined text-[24px] text-[#B9933F]">grid_view</span>
+              </div>
 
-          <div 
-            onClick={() => triggerToast && triggerToast("Contact helpdesk anytime via Support Portal.")}
-            className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-xl p-4 cursor-pointer hover:border-[#B9933F] transition-all space-y-1.5"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold font-mono text-[#B9933F]">04</span>
-              <span className="material-symbols-outlined text-[#B9933F] text-[20px]">support_agent</span>
-            </div>
-            <h3 className="text-[14px] font-bold text-[#1D1B19]">{t('landing.customerSupport')}</h3>
-            <p className="text-[11.5px] text-[#756F66] leading-tight">{t('landing.customerSupportDesc')}</p>
-          </div>
+              {/* Title & Description */}
+              <div className="space-y-1.5">
+                <h3 className="text-[15px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.multiplePlans')}</h3>
+                <p className="text-[12px] text-[#756F66] leading-relaxed">{t('landing.multiplePlansDesc')}</p>
+              </div>
 
+              {/* Decorative Accent Line */}
+              <div className="w-8 h-[2px] bg-[#B9933F]/30 mt-4 group-hover:w-12 group-hover:bg-[#B9933F] transition-all"></div>
+            </div>
+
+            {/* Card 02 */}
+            <div 
+              onClick={() => triggerToast && triggerToast("Contributions start as low as ₹10 or ₹50 daily.")}
+              className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-2xl p-6 shadow-xs hover:shadow-card-hover hover:border-[#B9933F] transition-all duration-300 relative group flex flex-col items-center justify-between min-h-[230px] cursor-pointer"
+            >
+              {/* Number Badge */}
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#B9933F] text-[#FFFDF8] font-bold text-[11px] font-mono flex items-center justify-center border-2 border-[#FFFDF8] shadow-xs z-10">
+                02
+              </div>
+
+              {/* Large Circular Icon Area */}
+              <div className="w-14 h-14 rounded-full bg-[#F4F0E8] border border-[#D8D0C1]/80 flex items-center justify-center text-[#861F2B] mt-2 mb-3 group-hover:scale-105 group-hover:bg-[#FFFDF8] group-hover:border-[#B9933F]/60 transition-all shadow-2xs">
+                <span className="material-symbols-outlined text-[24px] text-[#861F2B]">tune</span>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-1.5">
+                <h3 className="text-[15px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.flexibleOptions')}</h3>
+                <p className="text-[12px] text-[#756F66] leading-relaxed">{t('landing.flexibleOptionsDesc')}</p>
+              </div>
+
+              {/* Decorative Accent Line */}
+              <div className="w-8 h-[2px] bg-[#B9933F]/30 mt-4 group-hover:w-12 group-hover:bg-[#B9933F] transition-all"></div>
+            </div>
+
+            {/* Card 03 */}
+            <div 
+              onClick={() => triggerToast && triggerToast("All plans follow transparent maturity timetables.")}
+              className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-2xl p-6 shadow-xs hover:shadow-card-hover hover:border-[#B9933F] transition-all duration-300 relative group flex flex-col items-center justify-between min-h-[230px] cursor-pointer"
+            >
+              {/* Number Badge */}
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#B9933F] text-[#FFFDF8] font-bold text-[11px] font-mono flex items-center justify-center border-2 border-[#FFFDF8] shadow-xs z-10">
+                03
+              </div>
+
+              {/* Large Circular Icon Area */}
+              <div className="w-14 h-14 rounded-full bg-[#F4F0E8] border border-[#D8D0C1]/80 flex items-center justify-center text-[#285846] mt-2 mb-3 group-hover:scale-105 group-hover:bg-[#FFFDF8] group-hover:border-[#B9933F]/60 transition-all shadow-2xs">
+                <span className="material-symbols-outlined text-[24px] text-[#285846]">account_tree</span>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-1.5">
+                <h3 className="text-[15px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.structuredInvestment')}</h3>
+                <p className="text-[12px] text-[#756F66] leading-relaxed">{t('landing.structuredInvestmentDesc')}</p>
+              </div>
+
+              {/* Decorative Accent Line */}
+              <div className="w-8 h-[2px] bg-[#B9933F]/30 mt-4 group-hover:w-12 group-hover:bg-[#B9933F] transition-all"></div>
+            </div>
+
+            {/* Card 04 */}
+            <div 
+              onClick={() => triggerToast && triggerToast("Contact helpdesk anytime via Support Portal.")}
+              className="bg-[#FFFDF8] border border-[#D8D0C1] rounded-2xl p-6 shadow-xs hover:shadow-card-hover hover:border-[#B9933F] transition-all duration-300 relative group flex flex-col items-center justify-between min-h-[230px] cursor-pointer"
+            >
+              {/* Number Badge */}
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#B9933F] text-[#FFFDF8] font-bold text-[11px] font-mono flex items-center justify-center border-2 border-[#FFFDF8] shadow-xs z-10">
+                04
+              </div>
+
+              {/* Large Circular Icon Area */}
+              <div className="w-14 h-14 rounded-full bg-[#F4F0E8] border border-[#D8D0C1]/80 flex items-center justify-center text-[#B9933F] mt-2 mb-3 group-hover:scale-105 group-hover:bg-[#FFFDF8] group-hover:border-[#B9933F]/60 transition-all shadow-2xs">
+                <span className="material-symbols-outlined text-[24px] text-[#B9933F]">support_agent</span>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-1.5">
+                <h3 className="text-[15px] font-bold text-[#1D1B19] group-hover:text-[#861F2B] transition-colors">{t('landing.customerSupport')}</h3>
+                <p className="text-[12px] text-[#756F66] leading-relaxed">{t('landing.customerSupportDesc')}</p>
+              </div>
+
+              {/* Decorative Accent Line */}
+              <div className="w-8 h-[2px] bg-[#B9933F]/30 mt-4 group-hover:w-12 group-hover:bg-[#B9933F] transition-all"></div>
+            </div>
+
+          </div>
         </div>
+
       </section>
 
-      {/* 7. FINAL CTA (~180px Height) */}
-      <section id="contact" className="bg-[#861F2B] text-[#FFFDF8] py-10 px-6 text-center">
-        <div className="max-w-[600px] mx-auto space-y-4">
-          <h2 className="text-[26px] sm:text-[32px] font-bold tracking-tight">
-            {t('landing.readyToExplore')}
-          </h2>
-          <p className="text-[14px] text-[#FFFDF8]/80">
-            {t('landing.readySubheading')}
-          </p>
-          <div className="pt-1">
-            <button
-              onClick={onGetStarted}
-              className="bg-[#B9933F] hover:bg-[#a38232] text-[#1D1B19] font-bold py-3 px-8 rounded-xl text-[13.5px] tracking-wide uppercase transition-all cursor-pointer shadow-md"
-            >
-              {t('common.getStarted')}
-            </button>
+      {/* 7. REDESIGNED PREMIUM CTA SECTION */}
+      <section id="contact" className="px-6 md:px-12 my-10 max-w-[1240px] mx-auto">
+        <div className="bg-[#861F2B] text-[#FFFDF8] py-14 px-6 md:px-12 rounded-3xl relative overflow-hidden text-center shadow-card border border-[#B9933F]/30">
+          
+          {/* Subtle Corner Background Patterns & Glow */}
+          <div className="bg-[radial-gradient(#B9933F_1.5px,transparent_1.5px)] [background-size:14px_14px] opacity-15 absolute top-0 left-0 w-36 h-36 pointer-events-none"></div>
+          <div className="w-64 h-64 rounded-full border border-[#B9933F]/20 absolute -bottom-20 -right-20 pointer-events-none"></div>
+          <div className="w-48 h-48 rounded-full border border-[#B9933F]/15 absolute -bottom-10 -right-10 pointer-events-none"></div>
+
+          <div className="max-w-[620px] mx-auto space-y-4 relative z-10">
+            
+            {/* Small Decorative Ornament */}
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <div className="w-8 h-[1px] bg-[#B9933F]/60"></div>
+              <span className="material-symbols-outlined text-[#B9933F] text-[18px]">workspace_premium</span>
+              <div className="w-8 h-[1px] bg-[#B9933F]/60"></div>
+            </div>
+
+            {/* Heading */}
+            <h2 className="text-[28px] sm:text-[36px] font-bold tracking-tight text-[#FFFDF8]">
+              {t('landing.readyToExplore')}
+            </h2>
+
+            {/* Supporting Text */}
+            <p className="text-[14.5px] text-[#FFFDF8]/85 max-w-[500px] mx-auto leading-relaxed">
+              {t('landing.readySubheading')}
+            </p>
+
+            {/* Button */}
+            <div className="pt-3">
+              <button
+                onClick={onGetStarted}
+                className="bg-[#FFFDF8] hover:bg-[#F4F0E8] text-[#861F2B] font-bold py-3.5 px-9 rounded-xl text-[13.5px] tracking-wide uppercase transition-all cursor-pointer shadow-lg border border-[#B9933F]/40 hover:scale-[1.02] inline-flex items-center gap-2"
+              >
+                <span>{t('common.getStarted')}</span>
+                <span className="material-symbols-outlined text-[18px] text-[#861F2B]">arrow_forward</span>
+              </button>
+            </div>
+
           </div>
         </div>
       </section>
@@ -545,6 +736,12 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
                       <div className="bg-[#F4F0E8] p-2 rounded-lg"><span className="text-[#756F66] block text-[11px]">Daily Payout</span><strong className="text-[#285846]">{planData.offerA.daily}</strong></div>
                       <div className="bg-[#F4F0E8] p-2 rounded-lg"><span className="text-[#756F66] block text-[11px]">Referral Bonus</span><strong className="text-[#B9933F]">{planData.offerA.ref}</strong></div>
                     </div>
+                    {planData.offerA.details && (
+                      <p className="text-[12px] text-[#756F66] pt-1 leading-snug">{planData.offerA.details}</p>
+                    )}
+                    {planData.offerA.gold && (
+                      <p className="text-[12px] font-semibold text-[#B9933F] pt-0.5">{planData.offerA.gold}</p>
+                    )}
                   </div>
 
                   {/* Offer B */}
@@ -561,6 +758,12 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
                       <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Total Return</span><strong className="text-[#861F2B]">{planData.offerB.totalPayout}</strong></div>
                       <div className="bg-[#FFFDF8] border border-[#D8D0C1] p-2 rounded-lg"><span className="text-[#756F66] block text-[10.5px]">Total Benefit Shown</span><strong className="text-[#B9933F]">{planData.offerB.netBenefit}</strong></div>
                     </div>
+                    {planData.offerB.amendmentNotice && (
+                      <div className="pt-1.5 text-[11.5px] font-bold text-[#861F2B] flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-[15px]">info</span>
+                        <span>{planData.offerB.amendmentNotice}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

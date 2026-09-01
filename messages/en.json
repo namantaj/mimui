@@ -41,6 +41,17 @@
     "trustLine": "6 Investment Plans • Flexible Options • Customer Support",
     "optionsBadge": "6 OPTIONS",
     "chooseApproach": "Choose an approach that fits you.",
+    "rewardsBadge": "PREMIUM REWARDS",
+    "tier1Range": "₹10 – ₹100",
+    "tier1Desc": "Useful gifts on investment",
+    "tier2Range": "₹100 – ₹500",
+    "tier2Desc": "Attractive gifts on investment",
+    "tier3Range": "₹500 – ₹1,000",
+    "tier3Desc": "Premium gifts on investment",
+    "rewardsHeroHeadline1": "UNLOCK REWARDS.",
+    "rewardsHeroHeadline2": "WIN MORE.",
+    "rewardsHeroSub": "Invest in your future. Unlock exciting rewards and exclusive gifts.",
+    "exclusiveSub": "Exclusive Gifts • Attractive Rewards • Special Offers",
     "ribbon": "6 Plans • Different Goals • One Investment Destination",
     "ourPlans": "OUR PLANS",
     "plansHeading": "Investment Plans Made Simple.",
@@ -94,7 +105,11 @@
           "Expert Guidance: Company operates as a financial planner with specialized sectoral management.",
           "Gold Coin Incentive: Free 2-gram pure gold coin for lump-sum investments of ₹5,00,000 (₹5 Lakhs) or above.",
           "Withdrawal Freedom: Flexible withdrawal options subject to company guidelines.",
-          "Payment Protection: Verification advice for direct payments via official company bank accounts or official UPI (Paytm/PhonePe)."
+          "Payment Protection: Verification advice for direct payments via official company bank accounts or official UPI (Paytm/PhonePe).",
+          "Attractive interest rate starts from 3% per month, up to 36% annually.",
+          "Return guarantee from the first month.",
+          "Customer satisfaction is our priority.",
+          "Beware of fraudsters."
         ],
         "sectors": [
           "Mutual Funds / SIP",
@@ -123,7 +138,13 @@
           "Direct Referral Gift: 5% reward on each direct new entry.",
           "Instant Payment SMS: Mobile SMS confirmation issued within 24 hours of instalment payment.",
           "Diversified Allocation: Mutual Funds (SIP), Govt Tenders, Real Estate, FMCG, Foreign Currency, Retail & Travel.",
-          "Helpline Assistance: Customer complaint portal helpline (+91 6393552408) for transaction verifications."
+          "Helpline Assistance: Customer complaint portal helpline (+91 6393552408, +91 7307002373) for transaction verifications.",
+          "Investment is required only for the first 12 months.",
+          "1.5× amount return guarantee in 15 months.",
+          "5% Direct Income on every new entry as a guaranteed gift.",
+          "Payment should be made directly to the company's bank account. If payment is made through an agent and is not deposited into the company's account, the company will not take legal responsibility for it. Contact the company immediately in such a situation.",
+          "The registered mobile number should receive the payment confirmation message.",
+          "Beware of people/institutions offering similar names or similar offers."
         ],
         "tableHeader": {
           "daily": "Daily Investment",
@@ -146,7 +167,7 @@
         "tag": "DAILY RETURN",
         "min": "₹1,00,000",
         "type": "Structured lump-sum deposit",
-        "tenure": "11 Months / Custom duration",
+        "tenure": "Custom duration as per customer preference (As stated in brochure)",
         "payout": "Daily return payouts",
         "overview": "Capital investment options offering daily return payouts, with separate promotional tiers for distinct investment levels.",
         "features": [
@@ -154,13 +175,16 @@
           "Daily Return Payouts according to the selected brochure tier.",
           "Referral Return: Earn ₹25/day extra return per active reference on Option 1.",
           "Gold Incentive: Free 1-gram pure gold coin on investments of ₹5,00,000 (₹5 Lakhs) or above.",
-          "Transparent Tracking: Distinct promotional offers formatted cleanly per brochure guidelines."
+          "Transparent Tracking: Distinct promotional offers formatted cleanly per brochure guidelines.",
+          "Official Contact / Helpline Numbers: +91 6393552408, +91 7307002373"
         ],
         "offerA": {
-          "title": "Option 1: Standard Daily Return (Brochure Page 3)",
+          "title": "Option 1: ₹1,00,000 Daily Return Plan (Brochure Page 3)",
           "min": "₹1,00,000 Investment",
           "daily": "₹150 / day return",
-          "ref": "₹25 / day extra per reference"
+          "ref": "₹25 / day extra per reference",
+          "details": "₹1,00,000 investment provides ₹150 daily return. The return is available for as long as the customer wants, as stated in the brochure.",
+          "gold": "Free 1-gram pure gold coin on investment of ₹5,00,000 or above."
         },
         "offerB": {
           "title": "Option 2: Principal Return Offer / मूलधन-निकासी (Brochure Page 8)",
@@ -169,9 +193,10 @@
           "daily": "₹1,500 / day R.O.I",
           "monthly": "₹45,000 / month return",
           "totalPayout": "₹4,95,000 Total Return",
-          "netBenefit": "₹1,95,000 Total Benefit"
+          "netBenefit": "₹1,95,000 Total Benefit",
+          "amendmentNotice": "Possible amendment applicable from 1 October 2025."
         },
-        "disclaimer": "Figures presented above are illustrative examples shown in the plan brochure and do not constitute independent financial guarantees. Please refer to applicable plan terms for complete details."
+        "disclaimer": "Figures presented above are illustrative examples shown in the plan brochure and do not constitute independent financial guarantees. Helpline: +91 6393552408, +91 7307002373. Please refer to applicable plan terms for complete details."
       },
       "p4": {
         "title": "FLEXI SAVING PLAN",
@@ -187,7 +212,9 @@
           "Accessible daily investment starting at ₹50 per day.",
           "Short 7-Month Contribution Window: Instalments are required for the first 7 months (210 days) only.",
           "Structured 9-Month Cycle: Final maturity payout evaluated at the end of 9 months.",
-          "Ideal for budget-conscious savers looking to build systematic discipline."
+          "Ideal for budget-conscious savers looking to build systematic discipline.",
+          "Installments are required only for the first 7 months.",
+          "1.25× amount return guarantee at the end of the 9th month."
         ],
         "tableHeader": {
           "daily": "Daily Contribution",
@@ -211,12 +238,14 @@
         "payout": "Maturity payout",
         "overview": "Structured monthly investment options across 1, 2, and 3-year tenures for planned medium to long-term wealth building.",
         "features": [
+          "Official Product Terminology: B. Solutions S.I.P. Fund",
           "Monthly investment starting from ₹5,000/month.",
           "Three defined time horizons: 1 Year, 2 Years, and 3 Years.",
           "Direct Commission: Up to 5% referral commission on each monthly instalment.",
           "Maturity Rewards: Company provides gifts along with returns upon maturity.",
           "Taxable Registered Firm: Applicable GST deducted at payout as per rules.",
-          "Premature Withdrawal Terms: 5% penalty charge deducted on deposited amount if policy is discontinued early."
+          "Premature Withdrawal Terms: 5% penalty charge deducted on deposited amount if policy is discontinued early.",
+          "If the customer is unable to continue the installments and wants to withdraw the deposited amount, a 5% penalty will be deducted and the remaining deposited amount will be returned."
         ],
         "tableHeader": {
           "tenure": "Tenure",
@@ -247,7 +276,8 @@
           "Monthly Withdrawal Payouts: ₹160/month paid for 25 consecutive months (Months 16 to 40 = ₹4,000).",
           "Maturity Benefit: ₹5,100 lump-sum paid at the end of the 40th month.",
           "Total Stated Payout: ₹9,100 total return shown in brochure timetable.",
-          "Dual Commission: 5% Direct Commission on instalments + 2% Indirect Commission on next 3 new registrations."
+          "Dual Commission: 5% Direct Commission on instalments + 2% Indirect Commission on next 3 new registrations.",
+          "If a customer dies due to an accident and all the prescribed installments of the customer's policy have not yet been fully deposited, the determined amount payable will be provided to the nominee on the due date, according to the company's applicable accident policy."
         ],
         "tableHeader": {
           "phase": "Plan Stage",
@@ -437,8 +467,8 @@
     "totalEarnings": "Total Earnings",
     "personalTab": "Personal Info",
     "bankTab": "Bank Details",
-    "planTab": "Plan & Referral",
-    "kycTab": "KYC Verification",
+    "documentsTab": "Documents",
+    "planPaymentTab": "Plan & Payment",
     "fullName": "Full Name",
     "fatherOrHusbandName": "Father's / Husband's Name",
     "motherName": "Mother's Name",
@@ -466,7 +496,7 @@
     "digitalPaymentHeader": "Digital Payment & Contact Details",
     "paytmPhonePe": "Paytm / PhonePe Detail",
     "paymentMobile": "Registered Mobile Number",
-    "planHeader": "Registered Investment Plan & Scheme",
+    "planHeader": "Select Investment Plan",
     "planName": "Plan Name",
     "schemeAmount": "Scheme Plan (in ₹)",
     "referenceHeader": "Reference & Referral Information",
@@ -480,9 +510,13 @@
     "registrationHeader": "Registration Information",
     "regDate": "Registration Date",
     "regPlace": "Registration Place",
-    "docType": "Document Type",
-    "docNumber": "Document Number",
-    "status": "KYC Status"
+    "aadhaarDocument": "Aadhaar Card Upload",
+    "passbookDocument": "Passbook Photo Upload",
+    "uploadDocumentBtn": "Upload File",
+    "paymentHeader": "Plan Payment & Verification",
+    "paymentReference": "Payment Reference / Transaction ID",
+    "submitPaymentBtn": "Submit Payment Details",
+    "paymentStatus": "Payment Status"
   },
   "settings": {
     "title": "Portal Settings",
@@ -514,32 +548,28 @@
     "badge": "MANDATORY PARTNER AGREEMENT",
     "instruction": "Please read and acknowledge the official Company Policy guidelines below before proceeding to the Executive Dashboard.",
     "pointTitles": [
-      "Registration and Customer Investment",
-      "Taxation and Payment (G.S.T.)",
-      "Customer Satisfaction and Investment Safety",
-      "Bhagwan Family Group",
-      "Company Investment Responsibility",
-      "Group Contact and Branch Information",
-      "Complaint Portal and Helpdesk",
-      "Information and Company Updates",
-      "Premature Withdrawal and Penalty Terms",
-      "Accidental Death & Nominee Protection",
-      "Maturity Profit and Gift Benefits",
-      "Customer Satisfaction Identity"
+      "Registration",
+      "Tax Registration",
+      "Investment Responsibility",
+      "Head Office / Branch Office",
+      "Policy Changes",
+      "Complaint Portal / Helpline",
+      "Premature Discontinuation",
+      "Maturity Benefit and Gifts",
+      "Withdrawal",
+      "Accidental Death / Nominee"
     ],
     "points": [
-      "Every firm of Bhagwan Group is Registered with its respective departments and works for the benefit of customers' investment.",
-      "Bhagwan Solutions is a Taxable Registered Firm, meaning the company will make payment to every customer after deducting G.S.T. at the time of payment.",
-      "The satisfaction of customers and complete safety of the amount invested by them is the company's main objective.",
-      "Bhagwan Group is a family and every employee working in it and every related customer is a member of this family group.",
-      "The company will have complete responsibility for the investment received by the company, whether deposited in cash by customers or deposited directly into the company's bank accounts.",
-      "For detailed information about the group, you can also contact our Head Office or Branch Office.",
-      "If any employee working in the company or any related customer has any kind of problem, they can register their complaint on the company's Complaint Portal (Contact No. +916393552408), and prompt appropriate action will be taken.",
-      "Information about changes in the company will be communicated from time to time to our customers (family group) through our Website, our mobile number, or the Branch Office.",
-      "If any customer expresses inability to pay the installments of the Policy due to any reason and wants the amount deposited till then to be paid, the company will return the remaining amount to the customer after deducting a 5% Penalty Charge.",
-      "If a customer dies an accidental death and the customer's complete Policy installments have not been deposited in the company, even then the fixed amount payable to that customer will be paid to the deceased customer's Nominee on the due date.",
-      "The company provides each customer with the profit received at the end of their maturity period along with a gift.",
-      "Customer satisfaction is our identity."
+      "Every firm of Bhagwan Group is registered with its respective department and works for the investment interests of customers.",
+      "Bhagwn Solutions is a taxable registered firm.",
+      "Investments received from customers, whether deposited in cash or directly into the company's bank account, are the complete responsibility of the company.",
+      "Customers can contact the Head Office or Branch Office for detailed information.",
+      "Any changes made to company policies will be communicated to customers through the website, mobile number, or branch office.",
+      "For any problem or complaint, customers can register a complaint through the company's complaint portal/helpline at +91 6393552408, +91 7307002373. Appropriate action will be taken on the complaint.",
+      "If the customer is unable to continue the policy installments and wants to withdraw the deposited amount, a 5% penalty will be deducted and the remaining deposited amount will be returned.",
+      "At the maturity period, customers are provided the applicable profit along with gifts.",
+      "Customers have complete freedom to withdraw from their investment according to their needs, subject to the applicable company policy/terms.",
+      "In the event of the accidental death of a customer, the determined amount will be provided to the nominee on the due date according to the company's applicable accident policy."
     ],
     "motto1Title": "FREEDOM OF WITHDRAWAL IN INVESTMENT",
     "motto1Sub": "(WHENEVER YOU WANT ... HOWEVER YOU WANT)",
