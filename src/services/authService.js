@@ -12,6 +12,9 @@ import { supabase } from '../lib/supabase';
 
 /**
  * Generate a unique member/referral code.
+ *
+ * Example:
+ * REF762082
  */
 function generateMemberCode() {
   const randomNumber = Math.floor(100000 + Math.random() * 900000);
@@ -28,13 +31,24 @@ function isEmail(value) {
 /**
  * Validate sponsor/referral code.
  *
- * Initial sponsor codes:
- * REF1001
- * REF1002
- * REF1003
+ * Valid referral codes:
  *
- * Existing members can also be sponsors
- * using their member_id.
+ * 1. Original hardcoded sponsor codes:
+ *    REF1001
+ *    REF1002
+ *    REF1003
+ *
+ * 2. Any existing member's member_id.
+ *
+ * Example:
+ *
+ * Existing member:
+ * member_id = REF762082
+ *
+ * New user enters:
+ * REF762082
+ *
+ * This is valid.
  */
 export async function validateReferralCode(code) {
   if (!code || !code.trim()) {
@@ -43,22 +57,39 @@ export async function validateReferralCode(code) {
 
   const normalizedCode = code.trim().toUpperCase();
 
-  // Initial sponsor codes
-  const initialCodes = ['REF1001', 'REF1002', 'REF1003'];
+  /**
+   * Original hardcoded sponsor codes.
+   */
+  const initialCodes = [
+    'REF1001',
+    'REF1002',
+    'REF1003'
+  ];
 
+  /**
+   * If it is one of the original codes,
+   * accept it immediately.
+   */
   if (initialCodes.includes(normalizedCode)) {
     return true;
   }
 
-  // Check existing members
+  /**
+   * Otherwise check whether the code belongs
+   * to an existing member.
+   */
   const { data, error } = await supabase
     .from('members')
-    .select('id')
+    .select('id, member_id')
     .eq('member_id', normalizedCode)
     .maybeSingle();
 
   if (error) {
-    console.error('Error validating referral code:', error);
+    console.error(
+      'Error validating referral code:',
+      error
+    );
+
     return false;
   }
 
@@ -81,25 +112,32 @@ export async function loginUser(emailOrPhone, password) {
     );
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: normalizedInput.toLowerCase(),
-    password
-  });
+  const { data, error } =
+    await supabase.auth.signInWithPassword({
+      email: normalizedInput.toLowerCase(),
+      password
+    });
 
   if (error) {
     console.error('Login error:', error);
 
     if (
-      error.message?.toLowerCase().includes('invalid login credentials')
+      error.message
+        ?.toLowerCase()
+        .includes('invalid login credentials')
     ) {
       throw new Error('Invalid email or password.');
     }
 
-    throw new Error(error.message || 'Login failed.');
+    throw new Error(
+      error.message || 'Login failed.'
+    );
   }
 
   if (!data.user) {
-    throw new Error('Unable to retrieve your account.');
+    throw new Error(
+      'Unable to retrieve your account.'
+    );
   }
 
   /**
@@ -107,18 +145,25 @@ export async function loginUser(emailOrPhone, password) {
    *
    * members.id = Supabase Auth user ID.
    */
-  const { data: member, error: memberError } = await supabase
+  const {
+    data: member,
+    error: memberError
+  } = await supabase
     .from('members')
     .select('*')
     .eq('id', data.user.id)
     .maybeSingle();
 
   if (memberError) {
-    console.error('Member profile fetch error:', memberError);
+    console.error(
+      'Member profile fetch error:',
+      memberError
+    );
   }
 
   return {
-    token: data.session?.access_token || '',
+    token:
+      data.session?.access_token || '',
 
     user: {
       id: data.user.id,
@@ -137,6 +182,9 @@ export async function loginUser(emailOrPhone, password) {
         member?.phone ||
         '',
 
+      /**
+       * The user's own referral code.
+       */
       referralCode:
         member?.member_id ||
         '',
@@ -169,11 +217,33 @@ export async function loginUser(emailOrPhone, password) {
  *
  * Flow:
  *
- * Signup form
- *     ↓
- * Supabase Auth
- *     ↓
- * public.members
+ * New user enters:
+ *   Full Name
+ *   Email
+ *   Password
+ *   Sponsor / Referral Code
+ *
+ * The referral code can be:
+ *
+ *   REF1001
+ *   REF1002
+ *   REF1003
+ *
+ * OR
+ *
+ *   Any existing member's member_id.
+ *
+ * Example:
+ *
+ * Existing member:
+ *   member_id = REF762082
+ *
+ * New user enters:
+ *   REF762082
+ *
+ * New member:
+ *   member_id = REF835421
+ *   sponsor   = REF762082
  */
 export async function signupUser({
   fullName,
@@ -181,24 +251,47 @@ export async function signupUser({
   password,
   referralCode
 }) {
-  if (!fullName || !emailOrPhone || !password || !referralCode) {
+  /**
+   * Required fields.
+   */
+  if (
+    !fullName ||
+    !emailOrPhone ||
+    !password ||
+    !referralCode
+  ) {
     throw new Error('All fields are required.');
   }
 
   const normalizedName = fullName.trim();
   const normalizedInput = emailOrPhone.trim();
-  const normalizedReferralCode = referralCode.trim().toUpperCase();
 
+  /**
+   * Always store referral codes in uppercase.
+   */
+  const normalizedReferralCode =
+    referralCode.trim().toUpperCase();
+
+  /**
+   * Validate full name.
+   */
   if (!normalizedName) {
-    throw new Error('Full name is required.');
-  }
-
-  if (password.length < 6) {
-    throw new Error('Password must be at least 6 characters.');
+    throw new Error(
+      'Full name is required.'
+    );
   }
 
   /**
-   * First version uses email/password authentication.
+   * Validate password.
+   */
+  if (password.length < 6) {
+    throw new Error(
+      'Password must be at least 6 characters.'
+    );
+  }
+
+  /**
+   * Signup currently uses email/password.
    */
   if (!isEmail(normalizedInput)) {
     throw new Error(
@@ -206,23 +299,31 @@ export async function signupUser({
     );
   }
 
-  const email = normalizedInput.toLowerCase();
+  const email =
+    normalizedInput.toLowerCase();
 
   /**
-   * Validate sponsor before creating account.
+   * ------------------------------------------------
+   * STEP 1
+   * Validate sponsor/referral code.
+   * ------------------------------------------------
    */
-  const isValidSponsor = await validateReferralCode(
-    normalizedReferralCode
-  );
+  const isValidSponsor =
+    await validateReferralCode(
+      normalizedReferralCode
+    );
 
   if (!isValidSponsor) {
     throw new Error(
-      'Invalid or inactive referral/sponsor code.'
+      'Invalid referral/sponsor code. Please enter a valid existing member ID or sponsor code.'
     );
   }
 
   /**
+   * ------------------------------------------------
+   * STEP 2
    * Create Supabase Auth account.
+   * ------------------------------------------------
    */
   const {
     data: authData,
@@ -239,7 +340,10 @@ export async function signupUser({
   });
 
   if (authError) {
-    console.error('Supabase signup error:', authError);
+    console.error(
+      'Supabase signup error:',
+      authError
+    );
 
     if (
       authError.message
@@ -263,23 +367,67 @@ export async function signupUser({
   }
 
   /**
-   * IMPORTANT
+   * Supabase Auth user ID.
    *
-   * The member ID is the SAME ID as the Supabase Auth user.
-   *
-   * authData.user.id
-   *       =
-   * members.id
+   * This becomes members.id.
    */
-  const userId = authData.user.id;
+  const userId =
+    authData.user.id;
 
   /**
-   * Generate the member's own referral code.
+   * ------------------------------------------------
+   * STEP 3
+   * Generate NEW member's own referral code.
+   * ------------------------------------------------
+   *
+   * This is different from the sponsor code.
+   *
+   * Example:
+   *
+   * Sponsor:
+   * REF762082
+   *
+   * New member:
+   * REF835421
    */
-  const newMemberCode = generateMemberCode();
+  let newMemberCode =
+    generateMemberCode();
 
   /**
-   * Create member profile.
+   * Check generated code uniqueness.
+   */
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const {
+      data: existingMember,
+      error: checkError
+    } = await supabase
+      .from('members')
+      .select('id')
+      .eq('member_id', newMemberCode)
+      .maybeSingle();
+
+    if (checkError) {
+      console.error(
+        'Error checking member code:',
+        checkError
+      );
+
+      break;
+    }
+
+    if (!existingMember) {
+      break;
+    }
+
+    newMemberCode =
+      generateMemberCode();
+  }
+
+  /**
+   * ------------------------------------------------
+   * STEP 4
+   * Create member record.
+   * ------------------------------------------------
    */
   const {
     data: member,
@@ -287,38 +435,75 @@ export async function signupUser({
   } = await supabase
     .from('members')
     .insert({
+      /**
+       * Supabase Auth ID.
+       */
       id: userId,
 
+      /**
+       * Basic information.
+       */
       full_name: normalizedName,
-
       email,
-
       phone: null,
 
+      /**
+       * Address starts empty.
+       */
       address: null,
-
       city: null,
-
       state: null,
-
       pincode: null,
-
       country: 'India',
 
+      /**
+       * NEW member's own referral code.
+       */
       member_id: newMemberCode,
 
+      /**
+       * Plan starts empty.
+       */
       membership_plan: null,
+      plan_amount: null,
+      payment_status: null,
+      payment_reference: null,
 
+      /**
+       * Membership defaults.
+       */
       membership_status: 'active',
 
+      /**
+       * Wallet defaults.
+       */
       wallet_balance: 0,
-
       total_earnings: 0,
 
+      /**
+       * Profile must be completed later.
+       */
       profile_completed: false,
 
+      /**
+       * ⭐ IMPORTANT ⭐
+       *
+       * Save the referral code entered
+       * by the new user.
+       *
+       * Example:
+       *
+       * Existing member:
+       * member_id = REF762082
+       *
+       * New member:
+       * sponsor = REF762082
+       */
       sponsor: normalizedReferralCode,
 
+      /**
+       * Default rank.
+       */
       rank: 'Member'
     })
     .select()
@@ -333,7 +518,10 @@ export async function signupUser({
       memberError
     );
 
-    // Remove the auth session if one exists.
+    /**
+     * Auth account was created but
+     * member record failed.
+     */
     await supabase.auth.signOut();
 
     throw new Error(
@@ -342,7 +530,10 @@ export async function signupUser({
   }
 
   /**
-   * Return user data.
+   * ------------------------------------------------
+   * STEP 5
+   * Return newly created user.
+   * ------------------------------------------------
    */
   return {
     token:
@@ -360,6 +551,9 @@ export async function signupUser({
       phone:
         member.phone || '',
 
+      /**
+       * NEW member's own referral code.
+       */
       referralCode:
         member.member_id,
 
@@ -379,6 +573,9 @@ export async function signupUser({
         member.profile_completed
     },
 
+    /**
+     * New user's own referral code.
+     */
     referralCode:
       member.member_id
   };

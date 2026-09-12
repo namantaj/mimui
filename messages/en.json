@@ -101,12 +101,12 @@
         "overview": "Make a structured lump-sum contribution across diverse economic growth sectors managed with expert financial guidance.",
         "features": [
           "Structured one-time investment starting from ₹25,000.",
+          "Attractive interest rate starts from 3% per month, up to 36% annually.",
           "Allocated across multiple sectors including Real Estate, Mutual Funds (SIP), Share Market, FMCG, and Govt Tenders.",
           "Expert Guidance: Company operates as a financial planner with specialized sectoral management.",
           "Gold Coin Incentive: Free 2-gram pure gold coin for lump-sum investments of ₹5,00,000 (₹5 Lakhs) or above.",
           "Withdrawal Freedom: Flexible withdrawal options subject to company guidelines.",
           "Payment Protection: Verification advice for direct payments via official company bank accounts or official UPI (Paytm/PhonePe).",
-          "Attractive interest rate starts from 3% per month, up to 36% annually.",
           "Return guarantee from the first month.",
           "Customer satisfaction is our priority.",
           "Beware of fraudsters."
@@ -138,7 +138,7 @@
           "Direct Referral Gift: 5% reward on each direct new entry.",
           "Instant Payment SMS: Mobile SMS confirmation issued within 24 hours of instalment payment.",
           "Diversified Allocation: Mutual Funds (SIP), Govt Tenders, Real Estate, FMCG, Foreign Currency, Retail & Travel.",
-          "Helpline Assistance: Customer complaint portal helpline (+91 6393552408, +91 7307002373) for transaction verifications.",
+          "Helpline Assistance: Customer complaint portal helpline (+91 6307905172 , +91 6393559408) for transaction verifications.",
           "Investment is required only for the first 12 months.",
           "1.5× amount return guarantee in 15 months.",
           "5% Direct Income on every new entry as a guaranteed gift.",
@@ -153,10 +153,30 @@
           "returned": "Amount Returned (1.5x in brochure)"
         },
         "tableRows": [
-          { "daily": "₹10 / day", "days": "360 Days", "deposited": "₹3,600", "returned": "₹5,400" },
-          { "daily": "₹20 / day", "days": "360 Days", "deposited": "₹7,200", "returned": "₹10,800" },
-          { "daily": "₹50 / day", "days": "360 Days", "deposited": "₹18,000", "returned": "₹27,000" },
-          { "daily": "₹100 / day", "days": "360 Days", "deposited": "₹36,000", "returned": "₹54,000" }
+          {
+            "daily": "₹10 / day",
+            "days": "360 Days",
+            "deposited": "₹3,600",
+            "returned": "₹5,400"
+          },
+          {
+            "daily": "₹20 / day",
+            "days": "360 Days",
+            "deposited": "₹7,200",
+            "returned": "₹10,800"
+          },
+          {
+            "daily": "₹50 / day",
+            "days": "360 Days",
+            "deposited": "₹18,000",
+            "returned": "₹27,000"
+          },
+          {
+            "daily": "₹100 / day",
+            "days": "360 Days",
+            "deposited": "₹36,000",
+            "returned": "₹54,000"
+          }
         ],
         "disclaimer": "Example shown in the plan brochure. Instalments must be paid regularly for the full 12-month period. Please refer to applicable plan terms for complete details."
       },
@@ -172,11 +192,11 @@
         "overview": "Capital investment options offering daily return payouts, with separate promotional tiers for distinct investment levels.",
         "features": [
           "Structured lump-sum options starting from ₹1,00,000.",
-          "Daily Return Payouts according to the selected brochure tier.",
+          "Daily Return Payouts Upto ₹125 per day.",
           "Referral Return: Earn ₹25/day extra return per active reference on Option 1.",
           "Gold Incentive: Free 1-gram pure gold coin on investments of ₹5,00,000 (₹5 Lakhs) or above.",
           "Transparent Tracking: Distinct promotional offers formatted cleanly per brochure guidelines.",
-          "Official Contact / Helpline Numbers: +91 6393552408, +91 7307002373"
+          "Official Contact / Helpline Numbers: +91 6307905172 , +91 6393559408"
         ],
         "offerA": {
           "title": "Option 1: ₹1,00,000 Daily Return Plan (Brochure Page 3)",
@@ -223,7 +243,12 @@
           "returned": "Returned Amount (1.25x in brochure)"
         },
         "tableRows": [
-          { "daily": "₹50 / day", "days": "210 Days (7 Months)", "deposited": "₹10,500", "returned": "₹13,125" }
+          {
+            "daily": "₹50 / day",
+            "days": "210 Days (7 Months)",
+            "deposited": "₹10,500",
+            "returned": "₹13,125"
+          }
         ],
         "disclaimer": "Illustrative figure shown in the plan brochure. Instalments payable for first 7 months only. Please refer to applicable plan terms for complete details."
       },
@@ -254,9 +279,24 @@
           "rate": "Stated Return Rate"
         },
         "tableRows": [
-          { "tenure": "1 Year", "monthly": "₹5,000 / month", "returned": "₹78,000", "rate": "30%" },
-          { "tenure": "2 Years", "monthly": "₹5,000 / month", "returned": "₹195,600", "rate": "63%" },
-          { "tenure": "3 Years", "monthly": "₹5,000 / month", "returned": "₹390,600", "rate": "117%" }
+          {
+            "tenure": "1 Year",
+            "monthly": "₹5,000 / month",
+            "returned": "₹78,000",
+            "rate": "30%"
+          },
+          {
+            "tenure": "2 Years",
+            "monthly": "₹5,000 / month",
+            "returned": "₹195,600",
+            "rate": "63%"
+          },
+          {
+            "tenure": "3 Years",
+            "monthly": "₹5,000 / month",
+            "returned": "₹390,600",
+            "rate": "117%"
+          }
         ],
         "disclaimer": "As shown in the plan brochure. In case of premature discontinuation, a 5% penalty charge is deducted on deposited funds. Please refer to applicable plan terms for complete details."
       },
@@ -285,10 +325,26 @@
           "amount": "Stated Amount"
         },
         "tableRows": [
-          { "phase": "Daily Deposit", "details": "₹10 / day x 450 Days (15 Months)", "amount": "₹4,500 Deposited" },
-          { "phase": "Withdrawal Period", "details": "₹160 / month (Months 16 to 40, 25 Months)", "amount": "₹4,000 Withdrawal" },
-          { "phase": "Maturity Benefit", "details": "Lump-sum payout at end of 40th month", "amount": "₹5,100 Maturity" },
-          { "phase": "Total Return", "details": "Combined monthly payouts + maturity benefit", "amount": "₹9,100 Total Return" }
+          {
+            "phase": "Daily Deposit",
+            "details": "₹10 / day x 450 Days (15 Months)",
+            "amount": "₹4,500 Deposited"
+          },
+          {
+            "phase": "Withdrawal Period",
+            "details": "₹160 / month (Months 16 to 40, 25 Months)",
+            "amount": "₹4,000 Withdrawal"
+          },
+          {
+            "phase": "Maturity Benefit",
+            "details": "Lump-sum payout at end of 40th month",
+            "amount": "₹5,100 Maturity"
+          },
+          {
+            "phase": "Total Return",
+            "details": "Combined monthly payouts + maturity benefit",
+            "amount": "₹9,100 Total Return"
+          }
         ],
         "disclaimer": "Brochure calculation example. Nominee protection applicable as per company accident policy. Please refer to applicable plan terms for complete details."
       }

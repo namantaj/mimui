@@ -83,6 +83,10 @@ function Profile({
   const [submittingProfile, setSubmittingProfile] = useState(false);
   const [submittingPayment, setSubmittingPayment] = useState(false);
 
+  const [companyQrCodeUrl, setCompanyQrCodeUrl] = useState('');
+  const [companyUpiId, setCompanyUpiId] = useState('');
+  const [loadingPaymentSettings, setLoadingPaymentSettings] = useState(true);
+
   // Upload States for Real Supabase Storage
   const [uploadingAadhaar, setUploadingAadhaar] = useState(false);
   const [uploadingPassbook, setUploadingPassbook] = useState(false);
@@ -128,6 +132,37 @@ function Profile({
 
   const aadhaarUrl = documentsForm?.aadhaarUrl || user?.aadhaarDocumentUrl || '';
   const passbookUrl = documentsForm?.passbookUrl || user?.passbookDocumentUrl || '';
+
+  useEffect(() => {
+    const loadPaymentSettings = async () => {
+      try {
+        const { data, error } = await supabase.from('payment_settings').select('qr_code_url, upi_id, updated_at').limit(1).maybeSingle();
+        if (error) throw error;
+        setCompanyQrCodeUrl(data?.qr_code_url || '');
+        setCompanyUpiId(data?.upi_id || '');
+      } catch (error) {
+        console.error('Customer payment settings load error:', error);
+      } finally {
+        setLoadingPaymentSettings(false);
+      }
+    };
+
+    loadPaymentSettings();
+
+    const paymentSettingsChannel = supabase.channel(`customer-payment-settings-${user?.id || 'guest'}-${Date.now()}`).on('postgres_changes', { event: '*', schema: 'public', table: 'payment_settings' }, (payload) => {
+      console.log('Payment settings realtime update:', payload);
+      if (payload?.new) {
+        setCompanyQrCodeUrl(payload.new.qr_code_url || '');
+        setCompanyUpiId(payload.new.upi_id || '');
+      } else {
+        loadPaymentSettings();
+      }
+    }).subscribe();
+
+    return () => {
+      supabase.removeChannel(paymentSettingsChannel);
+    };
+  }, [user?.id]);
 
   const isDocumentsComplete = !!aadhaarUrl.trim() && !!passbookUrl.trim();
 
@@ -363,9 +398,7 @@ function Profile({
         .from('members')
         .update({
           membership_plan: planForm.planName,
-          plan_name: planForm.planName,
           plan_amount: planForm.schemeAmount || null,
-          scheme_amount: planForm.schemeAmount || null,
           payment_reference: planForm.paymentReference.trim(),
           payment_status: 'pending',
           updated_at: new Date().toISOString()
@@ -1223,30 +1256,30 @@ function Profile({
 
                   {/* QR Code Container */}
                   <div className="flex flex-col items-center justify-center p-5 bg-white border border-sand rounded-xl text-center space-y-3 shadow-sm">
-                    <div className="w-48 h-48 bg-cream border-2 border-primary/20 rounded-xl p-3 flex items-center justify-center relative">
-                      <svg className="w-full h-full text-espresso" viewBox="0 0 100 100" fill="currentColor">
-                        <rect x="0" y="0" width="100" height="100" fill="#FFF8F0" />
-                        <rect x="10" y="10" width="25" height="25" fill="#861F2B" />
-                        <rect x="15" y="15" width="15" height="15" fill="#FFF8F0" />
-                        <rect x="18" y="18" width="9" height="9" fill="#861F2B" />
-                        <rect x="65" y="10" width="25" height="25" fill="#861F2B" />
-                        <rect x="70" y="15" width="15" height="15" fill="#FFF8F0" />
-                        <rect x="73" y="18" width="9" height="9" fill="#861F2B" />
-                        <rect x="10" y="65" width="25" height="25" fill="#861F2B" />
-                        <rect x="15" y="70" width="15" height="15" fill="#FFF8F0" />
-                        <rect x="18" y="73" width="9" height="9" fill="#861F2B" />
-                        <rect x="40" y="10" width="10" height="10" fill="#861F2B" />
-                        <rect x="40" y="30" width="20" height="10" fill="#861F2B" />
-                        <rect x="10" y="40" width="15" height="10" fill="#861F2B" />
-                        <rect x="65" y="40" width="25" height="10" fill="#861F2B" />
-                        <rect x="40" y="55" width="15" height="15" fill="#861F2B" />
-                        <rect x="60" y="65" width="15" height="10" fill="#861F2B" />
-                        <rect x="80" y="80" width="10" height="10" fill="#861F2B" />
-                      </svg>
+                    <div className="w-48 h-48 bg-cream border-2 border-primary/20 rounded-xl p-3 flex items-center justify-center relative overflow-hidden">
+                      {loadingPaymentSettings ? (
+                        <div className="flex flex-col items-center justify-center gap-2 text-warm-gray">
+                          <span className="material-symbols-outlined animate-spin text-[28px]">progress_activity</span>
+                          <span className="text-[10px] font-semibold">Loading QR...</span>
+                        </div>
+                      ) : companyQrCodeUrl ? (
+                        <img src={companyQrCodeUrl} alt="Official Company Payment QR" className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center text-center px-3">
+                          <span className="material-symbols-outlined text-[42px] text-warm-gray">qr_code_2</span>
+                          <span className="text-[10px] font-bold text-warm-gray mt-2">QR CODE NOT AVAILABLE</span>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <span className="text-[11px] font-bold text-primary uppercase tracking-wider block">Official Company Payment QR</span>
-                      <span className="text-[10px] text-warm-gray">Scan with PhonePe, Paytm, GPay or BHIM UPI</span>
+                      <span className="text-[10px] text-warm-gray block">Scan with PhonePe, Paytm, GPay or BHIM UPI</span>
+                      {companyUpiId && (
+                        <div className="mt-2 px-3 py-1.5 rounded-lg bg-cream border border-sand">
+                          <span className="text-[10px] text-warm-gray font-semibold block">COMPANY UPI ID</span>
+                          <span className="text-xs font-bold text-espresso font-mono break-all">{companyUpiId}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 

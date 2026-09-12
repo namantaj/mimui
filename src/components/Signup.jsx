@@ -6,19 +6,19 @@ import { useLanguage } from '../context/LanguageContext';
 function Signup({ setRoute, triggerToast }) {
   const { signup } = useAuth();
   const { t, locale, switchLanguage } = useLanguage();
-
+  
   // Form State
   const [fullName, setFullName] = useState('');
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
-
+  
   // Validation States
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
-
+  
   // Success Screen State
   const [createdUser, setCreatedUser] = useState(null);
 
@@ -96,7 +96,7 @@ function Signup({ setRoute, triggerToast }) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-background animate-fade-in transition-colors duration-200">
         <div className="w-full max-w-[460px] bg-cream border border-sand rounded-2xl shadow-lg p-8 space-y-6 text-center">
-
+          
           <div className="h-16 w-16 bg-forest/10 rounded-full flex items-center justify-center text-forest mx-auto">
             <span className="material-symbols-outlined text-[36px] filled-icon">check_circle</span>
           </div>
@@ -131,7 +131,7 @@ function Signup({ setRoute, triggerToast }) {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background animate-fade-in transition-colors duration-200">
       <div className="w-full max-w-[460px] bg-cream border border-sand rounded-2xl shadow-lg p-8 space-y-6">
-
+        
         {/* Back to Home & Language Switcher Navigation */}
         <div className="flex items-center justify-between pb-3 border-b border-sand/60">
           <button
@@ -141,7 +141,7 @@ function Signup({ setRoute, triggerToast }) {
             <span className="material-symbols-outlined text-[18px]">arrow_back</span>
             {t('common.backToHome')}
           </button>
-          <button
+          <button 
             onClick={() => switchLanguage(locale === 'en' ? 'hi' : 'en')}
             className="h-7 px-2.5 rounded-lg bg-bone border border-sand hover:bg-ivory text-[11px] font-semibold text-espresso transition-all flex items-center gap-1 cursor-pointer"
           >
@@ -166,7 +166,7 @@ function Signup({ setRoute, triggerToast }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-
+          
           {/* Full Name */}
           <div className="space-y-1.5">
             <label className="text-[12px] font-semibold uppercase tracking-[0.05em] text-warm-gray">Full Name</label>
@@ -177,10 +177,11 @@ function Signup({ setRoute, triggerToast }) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Alexander Wright"
-                className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${errors.fullName
+                className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${
+                  errors.fullName
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                     : 'border-sand focus:border-primary focus:ring-primary/20 placeholder:text-warm-gray/50'
-                  }`}
+                }`}
               />
             </div>
             {errors.fullName && (
@@ -201,10 +202,11 @@ function Signup({ setRoute, triggerToast }) {
                 value={emailOrPhone}
                 onChange={(e) => setEmailOrPhone(e.target.value)}
                 placeholder="alexander@mlmenterprise.com"
-                className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${errors.emailOrPhone
+                className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${
+                  errors.emailOrPhone
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                     : 'border-sand focus:border-primary focus:ring-primary/20 placeholder:text-warm-gray/50'
-                  }`}
+                }`}
               />
             </div>
             {errors.emailOrPhone && (
@@ -225,10 +227,11 @@ function Signup({ setRoute, triggerToast }) {
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value)}
                 placeholder="REF1001"
-                className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${errors.referralCode
+                className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${
+                  errors.referralCode
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                     : 'border-sand focus:border-primary focus:ring-primary/20 placeholder:text-warm-gray/50'
-                  }`}
+                }`}
               />
             </div>
             {errors.referralCode && (
@@ -251,10 +254,11 @@ function Signup({ setRoute, triggerToast }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${errors.password
+                  className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${
+                    errors.password
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                       : 'border-sand focus:border-primary focus:ring-primary/20 placeholder:text-warm-gray/50'
-                    }`}
+                  }`}
                 />
               </div>
               {errors.password && (
@@ -275,10 +279,11 @@ function Signup({ setRoute, triggerToast }) {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${errors.confirmPassword
+                  className={`w-full h-11 pl-11 pr-4 rounded-xl border bg-bone text-espresso text-[14px] transition-all focus:outline-none focus:ring-1 ${
+                    errors.confirmPassword
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                       : 'border-sand focus:border-primary focus:ring-primary/20 placeholder:text-warm-gray/50'
-                    }`}
+                  }`}
                 />
               </div>
               {errors.confirmPassword && (
