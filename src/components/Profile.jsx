@@ -57,6 +57,15 @@ const INVESTMENT_PLANS = [
     amount: 4500,
     formattedAmount: '4,500',
     desc: 'Affordable micro-saving entry point (450 days deposit) with multi-phase returns.'
+  },
+  {
+    id: 'p7',
+    title: 'FIXED DEPOSIT PLAN',
+    tag: 'FIXED DEPOSIT / F.D. PLAN',
+    badge: 'Starting ₹25,000',
+    amount: 25000,
+    formattedAmount: '25,000',
+    desc: "Plan today for a more secure tomorrow, from children's education to retirement planning."
   }
 ];
 

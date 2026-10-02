@@ -347,6 +347,36 @@
           }
         ],
         "disclaimer": "Brochure calculation example. Nominee protection applicable as per company accident policy. Please refer to applicable plan terms for complete details."
+      },
+      "p7": {
+        "title": "FIXED DEPOSIT PLAN",
+        "desc": "Plan today for a more secure tomorrow, from children's education to retirement planning.",
+        "badge": "Starting ₹25,000",
+        "tag": "FIXED DEPOSIT / F.D. PLAN",
+        "min": "₹25,000",
+        "type": "Fixed Deposit / F.D. Plan",
+        "tenure": "15 Months",
+        "payout": "2× return in 15 months (As stated in the supplied plan information)",
+        "overview": "Plan today for a more secure tomorrow, from children's education to retirement planning.",
+        "features": [
+          "Minimum investment starts from ₹25,000.",
+          "Maha-Bachat plan information states 2× return in 15 months.",
+          "Investment areas include Government Tenders, Mutual Funds/SIP, Real Estate, FMCG, Share Market, Committee Plans, Foreign Currency, Retail Market and Tour & Travel.",
+          "According to the supplied plan information, investments of ₹2,00,000 or more are eligible for a 1-gram pure gold coin free of cost.",
+          "Customers are instructed to use the company's official bank account, Paytm or PhonePe for payment."
+        ],
+        "sectors": [
+          "Mutual Funds / SIP",
+          "Real Estate",
+          "Share Market",
+          "FMCG Sector",
+          "Government Tenders",
+          "Committee Plans",
+          "Foreign Currency",
+          "Retail Market",
+          "Tourism & Travel"
+        ],
+        "disclaimer": "According to the supplied plan information. Customer satisfaction is stated as the company's priority. Please refer to applicable company policy and terms for complete details."
       }
     }
   },

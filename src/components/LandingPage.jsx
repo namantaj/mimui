@@ -52,6 +52,13 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
       color: 'text-[#285846]',
       bg: 'bg-[#285846]/10',
       border: 'border-[#285846]'
+    },
+    '07': {
+      id: '07',
+      icon: 'account_balance',
+      color: 'text-[#B9933F]',
+      bg: 'bg-[#B9933F]/10',
+      border: 'border-[#B9933F]'
     }
   };
 
@@ -318,10 +325,10 @@ function LandingPage({ onGetStarted, _setRoute, triggerToast, darkMode, toggleDa
           </p>
         </div>
 
-        {/* 6 Cards 3x2 Grid */}
+        {/* Investment Plan Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-          {['01', '02', '03', '04', '05', '06'].map((id) => {
+          {['01', '02', '03', '04', '05', '06', '07'].map((id) => {
             const planKey = `p${parseInt(id, 10)}`;
             const meta = planMetaMap[id];
             const isFeatured = id === '01';
